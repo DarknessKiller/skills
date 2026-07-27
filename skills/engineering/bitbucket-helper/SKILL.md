@@ -80,11 +80,11 @@ bitbucket-helper update 123 --repo-dir . --refresh-description
 
 ## Test Plan
 - E2E: Planned/not applicable.
-- Ginkgo: Planned/not applicable.
+- Unit Tests: Planned/not applicable.
 
 ## Test Result
 - E2E: Not run yet.
-- Ginkgo: Not run yet.
+- Unit Tests: Not run yet.
 
 ## Code Risk
 - Risk: Describe the main review/runtime risk.
