@@ -7,7 +7,7 @@ An Agent Skills pack shaped after Matt Pocock's [`skills`](https://github.com/ma
 Install into the shared `~/.agents/skills` store only:
 
 ```bash
-npx -y skills@latest add https://github.com/darknesskiller/skills -g -a universal -y --full-depth
+npx -y skills@latest add https://github.com/darknesskiller/skills -g -y --full-depth
 ```
 
 Update already-installed skills:
@@ -19,7 +19,7 @@ npx -y skills@latest update -g
 Sync new skills from this repo too:
 
 ```bash
-npx -y skills@latest add https://github.com/darknesskiller/skills -g -a universal -y --full-depth
+npx -y skills@latest add https://github.com/darknesskiller/skills -g -y --full-depth
 ```
 
 ## Why this layout
