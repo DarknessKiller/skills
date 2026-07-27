@@ -1,0 +1,22 @@
+{
+  "name": "darknesskiller",
+  "owner": {
+    "name": "darknesskiller",
+    "url": "https://github.com/darknesskiller"
+  },
+  "description": "Atlas skills for real engineering, as an installable Claude Code plugin.",
+  "plugins": [
+    {
+      "name": "atlas-skills",
+      "source": "./",
+      "description": "Atlas agent skills for implementation, TDD, code review, Git, Go, Bitbucket, and worktrees.",
+      "category": "engineering",
+      "keywords": [
+        "engineering",
+        "skills",
+        "tdd",
+        "code-review"
+      ]
+    }
+  ]
+}

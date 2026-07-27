@@ -1,0 +1,3 @@
+interface:
+  display_name: "Bitbucket Helper"
+  short_description: "Draft and manage Bitbucket Server PRs"

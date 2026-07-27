@@ -1,0 +1,31 @@
+{
+  "name": "atlas-skills",
+  "version": "0.1.0",
+  "description": "Atlas agent skills for real engineering — implementation, TDD, code review, Git, Go, Bitbucket, and worktrees.",
+  "author": {
+    "name": "darknesskiller",
+    "url": "https://github.com/darknesskiller"
+  },
+  "homepage": "https://github.com/darknesskiller/skills",
+  "repository": "https://github.com/darknesskiller/skills",
+  "license": "MIT",
+  "keywords": [
+    "agent-skills",
+    "engineering",
+    "tdd",
+    "code-review",
+    "pi-package"
+  ],
+  "skills": [
+    "./skills/engineering/ask-atlas",
+    "./skills/engineering/bitbucket-helper",
+    "./skills/engineering/code-review",
+    "./skills/engineering/codebase-design",
+    "./skills/engineering/creating-worktrees",
+    "./skills/engineering/git",
+    "./skills/engineering/go",
+    "./skills/engineering/implement",
+    "./skills/engineering/parallel-agents",
+    "./skills/engineering/tdd"
+  ]
+}
