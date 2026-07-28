@@ -5,7 +5,7 @@ description: Use when drafting or refreshing pull request descriptions from loca
 
 # PR Writing
 
-Draft PR descriptions from local commits and changed files. The helper is pure Python and emits TOON on stdout.
+Draft PR descriptions from local commits and changed files. The helper is pure Python and emits Markdown on stdout by default.
 
 ```bash
 python3 skills/engineering/pr-writing/scripts/pr_writer.py
@@ -22,9 +22,10 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py
 ```bash
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir .
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --target main
+python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --format toon
 ```
 
-All command output is TOON. The Markdown body is in `pr.body` as an escaped TOON string.
+`draft` outputs the Markdown body directly. Use `--format toon` only when an agent needs source, target, commit, file, and count context.
 
 ## PR body
 

@@ -12,7 +12,7 @@ npx skills update pr-writing
 
 ## What it does
 
-`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper and emits TOON so agents can read the branch context and copy the Markdown body from `pr.body`.
+`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper and emits the Markdown PR body directly by default. Agents can opt into TOON with `--format toon` when they need branch context.
 
 ## When to reach for it
 
@@ -22,9 +22,9 @@ Type `/pr-writing`, or let the agent use it when a branch needs a PR description
 
 A local git repository with the target branch available from the configured remote.
 
-## AXI-shaped drafting
+## Drafting
 
-Run the helper with no args for content-first tool context, or `draft` for a TOON document containing source, target, commits, changed files, counts, and the escaped Markdown PR body.
+Run the helper with no args for tool context, or `draft --repo-dir .` for the Markdown PR body. Use `draft --repo-dir . --format toon` only when source, target, commits, changed files, counts, and the escaped Markdown body are needed as machine-readable context.
 
 ## PR body boundary
 
@@ -33,8 +33,9 @@ The standard shape is Description, Test Plan, Test Result, Code Risk, Related. U
 ## It's working if
 
 - The draft names real commits and files from the branch.
-- The output is TOON.
+- The default draft output is Markdown.
 - The PR body has exactly the standard top-level headings.
+- `--format toon` still returns machine-readable context when needed.
 
 ## Where it fits
 

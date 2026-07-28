@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draft pull request descriptions from local git history, emitting TOON."""
+"""Draft pull request descriptions from local git history."""
 
 from __future__ import annotations
 
@@ -170,7 +170,7 @@ def draft(repo_dir: str, remote: str, source: str | None, target: str | None) ->
         "commits": [{"index": i + 1, "summary": line} for i, line in enumerate(commit_lines[:12])],
         "files": [{"path": path} for path in files[:20]],
         "counts": {"commits": len(commit_lines), "files": len(files)},
-        "help": ["Copy `pr.body` into the pull request description"],
+        "help": ["Default draft output is Markdown; use `--format toon` for this context"],
     }
 
 
@@ -197,7 +197,7 @@ def help_view() -> dict[str, Any]:
             {"name": "--source", "default": "current branch", "description": "source branch"},
             {"name": "--target", "default": "remote HEAD", "description": "target branch"},
         ],
-        "examples": ["python3 pr_writer.py draft --repo-dir . --target main"],
+        "examples": ["python3 pr_writer.py draft --repo-dir . --target main", "python3 pr_writer.py draft --repo-dir . --format toon"],
     }
 
 
@@ -209,6 +209,7 @@ def build_parser() -> argparse.ArgumentParser:
     draft_cmd.add_argument("--remote", default="origin")
     draft_cmd.add_argument("--source")
     draft_cmd.add_argument("--target")
+    draft_cmd.add_argument("--format", choices=("markdown", "toon"), default="markdown")
     return parser
 
 
@@ -223,7 +224,11 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
         if args.cmd == "draft":
-            print_toon(draft(args.repo_dir, args.remote, args.source, args.target))
+            data = draft(args.repo_dir, args.remote, args.source, args.target)
+            if args.format == "toon":
+                print_toon(data)
+            else:
+                sys.stdout.write(data["pr"]["body"])
             return 0
         return error("unknown command", "Run `python3 pr_writer.py --help`", 2)
     except RuntimeError as exc:
