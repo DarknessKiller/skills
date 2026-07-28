@@ -12,7 +12,7 @@ npx skills update bitbucket-helper
 
 ## What it does
 
-`bitbucket-helper` reads, creates, and updates pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits TOON by default.
+`bitbucket-helper` reads, creates, updates, and approves pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR review context, changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits TOON by default.
 
 It is not for Bitbucket Cloud, and it no longer owns PR body writing; use `pr-writing` for that.
 
@@ -22,7 +22,7 @@ Type `/bitbucket-helper`, or let the agent use it when a branch needs a self-hos
 
 ## Prerequisites
 
-Live create/update/get calls need:
+Live create/update/get/approve calls need:
 
 ```bash
 BB_USER
@@ -33,7 +33,7 @@ BB_PASSWORD
 
 Run the helper with no args first. It prints the Python helper path, one-line purpose, inferred repo identity, branch context, and next useful commands as TOON.
 
-Default commands return compact TOON summaries. `get <pr_id>` is metadata-only; add `--body` for the PR description preview. For review context, start with `files <pr_id>`, then use `diff <pr_id> --path <path>`, `file <path> --at <ref>`, or `commits <pr_id>` as needed. Use `--full` only when the complete Bitbucket API response is necessary.
+Default commands return compact TOON summaries. `get <pr_id>` is metadata-only; add `--body` for the PR description preview. For review context, start with `review-context <pr_id>` to fetch PR metadata, changed files, and commits in one command, then use `diff <pr_id> --path <path>` or `file <path> --at <ref>` as needed. Use `approve <pr_id>` only after the user clearly asked for approval. Use `--full` only when the complete Bitbucket API response is necessary.
 
 ## PR body boundary
 
@@ -42,8 +42,8 @@ Draft or refresh the description with [pr-writing](https://github.com/darknesski
 ## It's working if
 
 - The agent identifies the Server/Data Center repo before mutating anything.
-- Live updates read the current PR version first.
-- Review reads stay scoped to the PR id, path, ref, or commit id.
+- Live updates and approvals read the current PR version first.
+- Review reads start with one compact `review-context` call, then stay scoped to the PR id, path, ref, or commit id.
 - Output is TOON.
 - Full API data appears only when `--full` is requested.
 

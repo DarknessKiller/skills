@@ -20,7 +20,7 @@ from typing import Any
 
 PASSWORD_ENV = "BB_PASSWORD"
 USER_ENV = "BB_USER"
-DESCRIPTION = "Read Bitbucket Server PRs, files, diffs, and commits; create and update PRs"
+DESCRIPTION = "Read Bitbucket Server PRs, review context, files, diffs, commits, and approvals; create and update PRs"
 PR_WRITER_PATH = Path(__file__).resolve().parents[2] / "pr-writing" / "scripts" / "pr_writer.py"
 
 spec = importlib.util.spec_from_file_location("pr_writer", PR_WRITER_PATH)
@@ -240,6 +240,23 @@ def update_pr(args: argparse.Namespace) -> dict:
     return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("PUT", url, payload, args.auth, args.user)
 
 
+def approve_pr(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    version = args.version
+    if version is None:
+        version = api_request("GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)["version"]
+    url = pull_request_url(info, args.pr_id, "approve", {"version": version})
+    return {"dryRun": True, "url": url, "version": version} if args.dry_run else api_request("POST", url, None, args.auth, args.user)
+
+
+def review_context(args: argparse.Namespace) -> dict:
+    return {
+        "pr": get_pr(args),
+        "changes": pr_changes(argparse.Namespace(**{**vars(args), "limit": args.files_limit})),
+        "commits": pr_commits(argparse.Namespace(**{**vars(args), "limit": args.commits_limit})),
+    }
+
+
 def pr_changes(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     return api_request("GET", pull_request_url(info, args.pr_id, "changes", {"limit": args.limit}), None, args.auth, args.user)
@@ -401,6 +418,24 @@ def summarize_commit(result: dict, full: bool = False) -> dict[str, Any]:
     return {"commit": {"id": str(result.get("id", ""))[:12], "message": str(result.get("message", "")).splitlines()[0], "author": author.get("displayName") or author.get("name") or ""}}
 
 
+def summarize_approval(result: dict, pr_id: int, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    if result.get("dryRun"):
+        return {"dry_run": {"action": "approve", "pr": pr_id, "version": result["version"], "url": result["url"]}, "help": ["Re-run without `--dry-run` to approve"]}
+    user = result.get("user") or {}
+    return {"approval": {"pr": pr_id, "approved": result.get("approved"), "user": user.get("name") or user.get("displayName") or ""}}
+
+
+def summarize_review_context(result: dict, pr_id: int, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    data = summarize_pr(result["pr"], "get")
+    data.update(summarize_changes(result["changes"], pr_id))
+    data.update(summarize_commits(result["commits"], pr_id))
+    return data
+
+
 def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
     data: dict[str, Any] = {"tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION}}
     try:
@@ -411,6 +446,8 @@ def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
         data["repo"] = "unknown"
     data["commands"] = [
         {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir ."},
+        {"name": "review-context", "usage": "python3 bitbucket_server_pr.py review-context <pr_id> --repo-dir ."},
+        {"name": "approve", "usage": "python3 bitbucket_server_pr.py approve <pr_id> --repo-dir ."},
         {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir ."},
         {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
         {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
@@ -426,6 +463,8 @@ def help_view() -> dict[str, Any]:
         "tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION},
         "commands": [
             {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir . [--body]"},
+            {"name": "review-context", "usage": "python3 bitbucket_server_pr.py review-context <pr_id> --repo-dir ."},
+            {"name": "approve", "usage": "python3 bitbucket_server_pr.py approve <pr_id> --repo-dir ."},
             {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir . --limit 100"},
             {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
             {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
@@ -483,6 +522,17 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--description-file")
     update.add_argument("--refresh-description", action="store_true")
 
+    approve = sub.add_parser("approve", add_help=False)
+    add_api(approve)
+    approve.add_argument("pr_id", type=int)
+    approve.add_argument("--version", type=int)
+
+    review = sub.add_parser("review-context", add_help=False)
+    add_api(review)
+    review.add_argument("pr_id", type=int)
+    review.add_argument("--files-limit", type=int, default=100)
+    review.add_argument("--commits-limit", type=int, default=50)
+
     files = sub.add_parser("files", add_help=False)
     add_api(files)
     files.add_argument("pr_id", type=int)
@@ -529,6 +579,10 @@ def main(argv: list[str] | None = None) -> int:
             print_toon(summarize_pr(get_pr(args), "get", args.full, args.body))
         elif args.cmd == "update":
             print_toon(summarize_pr(update_pr(args), "update", args.full))
+        elif args.cmd == "approve":
+            print_toon(summarize_approval(approve_pr(args), args.pr_id, args.full))
+        elif args.cmd == "review-context":
+            print_toon(summarize_review_context(review_context(args), args.pr_id, args.full))
         elif args.cmd == "files":
             print_toon(summarize_changes(pr_changes(args), args.pr_id, args.full))
         elif args.cmd == "commits":
