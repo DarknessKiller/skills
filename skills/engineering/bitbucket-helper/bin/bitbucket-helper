@@ -1,6 +1,0 @@
-#!/bin/sh
-set -eu
-
-SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-export BITBUCKET_HELPER_BIN="$SCRIPT_DIR/bitbucket-helper"
-exec python3 "$SCRIPT_DIR/../scripts/bitbucket_server_pr.py" "$@"

@@ -12,28 +12,41 @@ npx skills update bitbucket-helper
 
 ## What it does
 
-`bitbucket-helper` handles self-hosted Bitbucket Server/Data Center PR work. It infers project and repo identity from local git remotes, drafts reviewable PR descriptions, and uses the Server REST API.
+`bitbucket-helper` reads, creates, and updates pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits TOON by default.
 
-The defining constraint is host type: it is for Bitbucket Server/Data Center, not Bitbucket Cloud.
+It is not for Bitbucket Cloud, and it no longer owns PR body writing; use `pr-writing` for that.
 
 ## When to reach for it
 
-Type `/bitbucket-helper`, or let the agent reach for it automatically when a task mentions self-hosted Bitbucket PRs. For GitHub or Bitbucket Cloud, use the repo's native tooling instead.
+Type `/bitbucket-helper`, or let the agent use it when a branch needs a self-hosted Bitbucket PR mutation, an existing PR needs reading/updating, or Cloud-only Bitbucket tooling would be wrong.
 
 ## Prerequisites
 
-Requires `BB_USER` and `BB_PASSWORD` for live create/update calls. Drafting from local git history works without writing remote state.
+Live create/update/get calls need:
 
-## Server-first PRs
+```bash
+BB_USER
+BB_PASSWORD
+```
 
-The leading phrase is **self-hosted**. The skill avoids Cloud-only APIs, keeps tokens out of output, and uses a fixed PR body shape: Description, Test Plan, Test Result, Code Risk, Related.
+## AXI-shaped Bitbucket API work
+
+Run the helper with no args first. It prints the Python helper path, one-line purpose, inferred repo identity, branch context, and next useful commands as TOON.
+
+Default commands return compact TOON summaries. `get <pr_id>` is metadata-only; add `--body` for the PR description preview. For review context, start with `files <pr_id>`, then use `diff <pr_id> --path <path>`, `file <path> --at <ref>`, or `commits <pr_id>` as needed. Use `--full` only when the complete Bitbucket API response is necessary.
+
+## PR body boundary
+
+Draft or refresh the description with [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing). This skill only moves that body through the Bitbucket Server REST API.
 
 ## It's working if
 
-- The agent names the right source of truth before acting.
-- The output uses the skill's leading words consistently.
-- The next action is smaller and clearer than the original request.
+- The agent identifies the Server/Data Center repo before mutating anything.
+- Live updates read the current PR version first.
+- Review reads stay scoped to the PR id, path, ref, or commit id.
+- Output is TOON.
+- Full API data appears only when `--full` is requested.
 
 ## Where it fits
 
-Use this after [implement](https://github.com/darknesskiller/skills/tree/main/skills/engineering/implement) when the branch needs a Bitbucket PR. Use [git](https://github.com/darknesskiller/skills/tree/main/skills/engineering/git) first if the branch history still needs cleanup. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).
+Use this after [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing) when a branch is ready for a Bitbucket PR. Use [git](https://github.com/darknesskiller/skills/tree/main/skills/engineering/git) first if branch history needs cleanup. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).

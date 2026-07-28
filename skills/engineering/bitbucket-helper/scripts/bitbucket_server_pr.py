@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Draft, create, and update pull requests for Bitbucket Server/Data Center."""
+"""Read, create, and update Bitbucket Server/Data Center pull requests, emitting TOON."""
 
 from __future__ import annotations
 
 import argparse
 import base64
+import importlib.util
 import json
 import os
 import re
@@ -15,12 +16,18 @@ import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
-
+from typing import Any
 
 PASSWORD_ENV = "BB_PASSWORD"
 USER_ENV = "BB_USER"
-BIN_ENV = "BITBUCKET_HELPER_BIN"
-DESCRIPTION = "Draft, create, read, and update Bitbucket Server/Data Center pull requests"
+DESCRIPTION = "Read Bitbucket Server PRs, files, diffs, and commits; create and update PRs"
+PR_WRITER_PATH = Path(__file__).resolve().parents[2] / "pr-writing" / "scripts" / "pr_writer.py"
+
+spec = importlib.util.spec_from_file_location("pr_writer", PR_WRITER_PATH)
+if spec is None or spec.loader is None:
+    raise SystemExit("could not load pr-writing helper")
+pr_writer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(pr_writer)
 
 
 @dataclass
@@ -28,6 +35,27 @@ class RepoInfo:
     base_url: str
     project: str
     repo: str
+
+
+def print_toon(data: dict[str, Any]) -> None:
+    pr_writer.print_toon(data)
+
+
+def q(value: object) -> str:
+    return pr_writer.q(value)
+
+
+def error(message: str, help_text: str | None = None, code: int = 1) -> int:
+    data: dict[str, Any] = {"error": message}
+    if help_text:
+        data["help"] = help_text
+    print_toon(data)
+    return code
+
+
+class Parser(argparse.ArgumentParser):
+    def error(self, message: str) -> None:
+        raise SystemExit(error(message, "Run `python3 bitbucket_server_pr.py --help`", 2))
 
 
 def run_git(repo_dir: str, *args: str, check: bool = True) -> str:
@@ -39,26 +67,13 @@ def run_git(repo_dir: str, *args: str, check: bool = True) -> str:
         check=False,
     )
     if check and result.returncode != 0:
-        raise SystemExit(f"git {' '.join(args)} failed: {result.stderr.strip()}")
+        raise RuntimeError(f"git {' '.join(args)} failed: {result.stderr.strip()}")
     return result.stdout.strip()
 
 
 def display_path(path: str) -> str:
     home = str(Path.home())
-    if path == home:
-        return "~"
-    if path.startswith(home + os.sep):
-        return "~" + path[len(home) :]
-    return path
-
-
-def quote_toon(value: object) -> str:
-    text = "" if value is None else str(value)
-    return json.dumps(text)
-
-
-def print_lines(lines: list[str]) -> None:
-    sys.stdout.write("\n".join(lines) + "\n")
+    return "~" + path[len(home):] if path.startswith(home) else path
 
 
 def current_branch(repo_dir: str) -> str:
@@ -74,203 +89,66 @@ def infer_repo_info(url: str) -> RepoInfo:
     if normalized.startswith("git@"):
         match = re.match(r"git@([^:]+):/?(.+)$", normalized)
         if not match:
-            raise ValueError(f"unsupported ssh remote: {url}")
+            raise RuntimeError(f"unsupported ssh remote: {url}")
         normalized = f"https://{match.group(1)}/{match.group(2)}"
 
     parsed = urllib.parse.urlparse(normalized)
     if not parsed.scheme or not parsed.netloc:
-        raise ValueError(f"unsupported remote URL: {url}")
+        raise RuntimeError(f"unsupported remote URL: {url}")
 
     path = parsed.path.rstrip("/")
-    scm_match = re.match(r"^/scm/([^/]+)/([^/]+?)(?:\.git)?$", path, re.IGNORECASE)
-    browse_match = re.match(r"^/projects/([^/]+)/repos/([^/]+?)(?:/.*)?$", path, re.IGNORECASE)
-    match = scm_match or browse_match
+    match = re.match(r"^/scm/([^/]+)/([^/]+?)(?:\.git)?$", path, re.IGNORECASE) or re.match(
+        r"^/projects/([^/]+)/repos/([^/]+?)(?:/.*)?$", path, re.IGNORECASE
+    )
     if not match:
-        raise ValueError(f"could not infer Bitbucket Server project/repo from {url}")
-
-    base = f"{parsed.scheme}://{parsed.netloc}"
-    return RepoInfo(base_url=base, project=match.group(1).upper(), repo=match.group(2))
+        raise RuntimeError(f"could not infer Bitbucket Server project/repo from {url}")
+    return RepoInfo(f"{parsed.scheme}://{parsed.netloc}", match.group(1).upper(), match.group(2))
 
 
 def default_target_branch(repo_dir: str, remote: str) -> str:
-    ref = run_git(repo_dir, "symbolic-ref", f"refs/remotes/{remote}/HEAD", check=False)
-    if ref:
-        return ref.rsplit("/", 1)[-1]
-    for candidate in ("main", "master", "develop"):
-        exists = run_git(repo_dir, "rev-parse", "--verify", f"{remote}/{candidate}", check=False)
-        if exists:
-            return candidate
-    return "main"
+    return pr_writer.default_target_branch(repo_dir, remote)
 
 
-def commits(repo_dir: str, remote: str, target: str, source: str) -> list[str]:
-    out = run_git(repo_dir, "log", "--oneline", f"{remote}/{target}..{source}", check=False)
-    return [line for line in out.splitlines() if line.strip()]
+def repo_info_from_args(args: argparse.Namespace) -> RepoInfo:
+    if args.base_url:
+        if not args.project or not args.repo:
+            raise RuntimeError("--project and --repo are required with --base-url")
+        return RepoInfo(args.base_url, args.project, args.repo)
+    return infer_repo_info(remote_url(args.repo_dir, args.remote))
 
 
-def changed_files(repo_dir: str, remote: str, target: str, source: str) -> list[str]:
-    out = run_git(repo_dir, "diff", "--name-only", f"{remote}/{target}...{source}", check=False)
-    return [line for line in out.splitlines() if line.strip()]
+def repo_api_url(info: RepoInfo, path: str = "", params: dict[str, object] | None = None) -> str:
+    base = f"{info.base_url}/rest/api/1.0/projects/{urllib.parse.quote(info.project)}/repos/{urllib.parse.quote(info.repo)}"
+    url = f"{base}/{path.lstrip('/')}" if path else base
+    if params:
+        clean = {key: value for key, value in params.items() if value is not None}
+        if clean:
+            url += "?" + urllib.parse.urlencode(clean)
+    return url
 
 
-def jira_keys(*texts: str) -> list[str]:
-    found: list[str] = []
-    seen: set[str] = set()
-    for text in texts:
-        for key in re.findall(r"\b[A-Z][A-Z0-9]+-\d+\b", text):
-            if key not in seen:
-                seen.add(key)
-                found.append(key)
-    return found
+def pull_request_url(info: RepoInfo, pr_id: int | None = None, path: str = "", params: dict[str, object] | None = None) -> str:
+    pr_path = "pull-requests" if pr_id is None else f"pull-requests/{pr_id}"
+    if path:
+        pr_path += "/" + path.lstrip("/")
+    return repo_api_url(info, pr_path, params)
 
 
-def draft_description(repo_dir: str, remote: str, source: str, target: str) -> str:
-    commit_lines = commits(repo_dir, remote, target, source)
-    files = changed_files(repo_dir, remote, target, source)
-    keys = jira_keys(source, "\n".join(commit_lines))
-
-    changes = commit_lines[:12] or ["Describe the implementation changes."]
-    file_sample = files[:20]
-
-    lines = [
-        "## Description",
-        "- Describe what changed and why.",
-        "",
-        "- Key changes:",
-    ]
-    lines.extend(f"- {line}" for line in changes)
-    if file_sample:
-        lines.extend(["", "- Files touched:"])
-        lines.extend(f"- `{path}`" for path in file_sample)
-        if len(files) > len(file_sample):
-            lines.append(f"- ...and {len(files) - len(file_sample)} more")
-    lines.extend(
-        [
-            "",
-            "## Test Plan",
-            "- E2E: Planned/not applicable.",
-            "- Ginkgo: Planned/not applicable.",
-            "",
-            "## Test Result",
-            "- E2E: Not run yet.",
-            "- Ginkgo: Not run yet.",
-            "",
-            "## Code Risk",
-            "- Risk: Describe the main review/runtime risk.",
-            "- Rollback: Revert this PR.",
-            "",
-            "## Related",
-        ]
-    )
-    lines.extend(f"- {key}" for key in keys) if keys else lines.append("- Not applicable.")
-    return "\n".join(lines) + "\n"
-
-
-def home_view(repo_dir: str = ".", remote: str = "origin") -> None:
-    bin_path = os.environ.get(BIN_ENV) or os.path.abspath(__file__)
-    lines = [
-        f"bin: {quote_toon(display_path(bin_path))}",
-        f"description: {quote_toon(DESCRIPTION)}",
-    ]
-    try:
-        source = current_branch(repo_dir)
-        target = default_target_branch(repo_dir, remote)
-        info = repo_info_from_args(
-            argparse.Namespace(
-                base_url=None,
-                project=None,
-                repo=None,
-                repo_dir=repo_dir,
-                remote=remote,
-            )
-        )
-        lines.extend(
-            [
-                "repo:",
-                f"  base_url: {quote_toon(info.base_url)}",
-                f"  project: {quote_toon(info.project)}",
-                f"  repo: {quote_toon(info.repo)}",
-                "branch:",
-                f"  source: {quote_toon(source or 'unknown')}",
-                f"  target: {quote_toon(target)}",
-            ]
-        )
-    except (SystemExit, ValueError):
-        lines.append("repo: unknown")
-    lines.extend(
-        [
-            "help[4]:",
-            '  "Run `bitbucket-helper draft --repo-dir .` to draft a PR description"',
-            '  "Run `bitbucket-helper create --repo-dir . --target main --title \\"...\\"` to create a PR"',
-            '  "Run `bitbucket-helper get <pr_id> --repo-dir .` to read a PR"',
-            '  "Add `--json` to create/get/update for raw Bitbucket API output"',
-        ]
-    )
-    print_lines(lines)
-
-
-def pr_branch(ref: dict) -> str:
-    return str(ref.get("displayId") or ref.get("id", "")).removeprefix("refs/heads/")
-
-
-def pr_links(pr: dict) -> str:
-    links = pr.get("links", {})
-    for link in links.get("self", []):
-        href = link.get("href")
-        if href:
-            return href
-    return ""
-
-
-def print_pr_result(result: dict, action: str) -> None:
-    if result.get("dryRun"):
-        payload = result.get("payload", {})
-        lines = [
-            "dry_run:",
-            f"  action: {quote_toon(action)}",
-            f"  url: {quote_toon(result.get('url'))}",
-            f"  title: {quote_toon(payload.get('title'))}",
-            f"  from: {quote_toon(payload.get('fromRef', {}).get('id'))}",
-            f"  to: {quote_toon(payload.get('toRef', {}).get('id'))}",
-            f"  reviewers: {len(payload.get('reviewers', []))}",
-            'help[1]: "Re-run without `--dry-run` to call Bitbucket Server"',
-        ]
-        print_lines(lines)
-        return
-
-    lines = [
-        "pull_request:",
-        f"  action: {quote_toon(action)}",
-        f"  id: {result.get('id', result.get('number', ''))}",
-        f"  title: {quote_toon(result.get('title'))}",
-        f"  state: {quote_toon(result.get('state'))}",
-        f"  version: {result.get('version', '')}",
-        f"  from: {quote_toon(pr_branch(result.get('fromRef', {})))}",
-        f"  to: {quote_toon(pr_branch(result.get('toRef', {})))}",
-        f"  url: {quote_toon(pr_links(result))}",
-    ]
-    print_lines(lines)
-
-
-def token_from_env() -> tuple[str, str] | tuple[None, None]:
+def token_from_env() -> str:
     token = os.environ.get(PASSWORD_ENV)
-    if token:
-        return PASSWORD_ENV, token
-    return None, None
+    if not token:
+        raise RuntimeError(f"missing token; set {PASSWORD_ENV}")
+    return token
 
 
 def api_request(method: str, url: str, payload: dict | None, auth: str, user: str | None) -> dict:
-    env_name, token = token_from_env()
-    if not token:
-        raise SystemExit(f"missing token; set {PASSWORD_ENV}")
-
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    token = token_from_env()
     if auth == "basic":
         user = user or os.environ.get(USER_ENV)
         if not user:
-            raise SystemExit(f"--user or {USER_ENV} is required with --auth basic")
-        raw = f"{user}:{token}".encode()
-        headers["Authorization"] = "Basic " + base64.b64encode(raw).decode()
+            raise RuntimeError(f"--user or {USER_ENV} is required with --auth basic")
+        headers["Authorization"] = "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode()
     else:
         headers["Authorization"] = f"Bearer {token}"
 
@@ -280,88 +158,62 @@ def api_request(method: str, url: str, payload: dict | None, auth: str, user: st
         with urllib.request.urlopen(request, timeout=60) as response:
             return json.loads(response.read().decode())
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")
-        raise SystemExit(f"Bitbucket API failed: HTTP {exc.code}: {body}") from exc
+        body = exc.read().decode(errors="replace")[:500]
+        raise RuntimeError(f"Bitbucket API failed: HTTP {exc.code}: {body}") from exc
     except urllib.error.URLError as exc:
-        raise SystemExit(f"Bitbucket API failed using {env_name}: {exc.reason}") from exc
-
-
-def repo_info_from_args(args: argparse.Namespace) -> RepoInfo:
-    if args.base_url:
-        if not args.project or not args.repo:
-            raise SystemExit("--project and --repo are required with --base-url")
-        return RepoInfo(args.base_url, args.project, args.repo)
-    return infer_repo_info(remote_url(args.repo_dir, args.remote))
-
-
-def pull_request_url(info: RepoInfo, pr_id: int | None = None) -> str:
-    base = f"{info.base_url}/rest/api/1.0/projects/{urllib.parse.quote(info.project)}/repos/{urllib.parse.quote(info.repo)}/pull-requests"
-    return f"{base}/{pr_id}" if pr_id is not None else base
+        raise RuntimeError(f"Bitbucket API failed: {exc.reason}") from exc
 
 
 def read_text_arg(value: str | None, file_path: str | None) -> str | None:
     if value is not None and file_path is not None:
-        raise SystemExit("use either --description or --description-file, not both")
+        raise RuntimeError("use either --description or --description-file, not both")
     if file_path is None:
         return value
-    with open(file_path, "r", encoding="utf-8") as handle:
-        return handle.read()
+    return Path(file_path).read_text(encoding="utf-8")
+
+
+def ref(repo: RepoInfo, branch: str) -> dict:
+    return {"id": f"refs/heads/{branch}", "repository": {"slug": repo.repo, "project": {"key": repo.project}}}
+
+
+def ref_payload(value: dict) -> dict:
+    repository = value.get("repository", {})
+    project = repository.get("project", {})
+    payload = {"id": value["id"]}
+    if repository:
+        payload["repository"] = {"slug": repository["slug"], "project": {"key": project["key"]}}
+    return payload
+
+
+def reviewer_payload(reviewers: list[dict]) -> list[dict]:
+    return [{"user": {"name": r["user"]["name"]}} for r in reviewers if r.get("user", {}).get("name")]
 
 
 def create_pr(args: argparse.Namespace) -> dict:
     source = args.source or current_branch(args.repo_dir)
     target = args.target or default_target_branch(args.repo_dir, args.remote)
     if not source:
-        raise SystemExit("could not determine source branch; pass --source")
-
+        raise RuntimeError("could not determine source branch; pass --source")
     info = repo_info_from_args(args)
-    title = args.title or source
-    description = read_text_arg(args.description, args.description_file) or draft_description(args.repo_dir, args.remote, source, target)
-
+    description = read_text_arg(args.description, args.description_file) or pr_writer.draft_body(args.repo_dir, args.remote, source, target)
     payload = {
-        "title": title,
+        "title": args.title or source,
         "description": description,
         "state": "OPEN",
         "open": True,
         "closed": False,
-        "fromRef": {"id": f"refs/heads/{source}", "repository": {"slug": info.repo, "project": {"key": info.project}}},
-        "toRef": {"id": f"refs/heads/{target}", "repository": {"slug": info.repo, "project": {"key": info.project}}},
+        "fromRef": ref(info, source),
+        "toRef": ref(info, target),
     }
     if args.reviewers:
         payload["reviewers"] = [{"user": {"name": name}} for name in args.reviewers]
-
     url = pull_request_url(info)
-    if args.dry_run:
-        return {"dryRun": True, "url": url, "payload": payload}
-    return api_request("POST", url, payload, args.auth, args.user)
-
-
-def ref_payload(ref: dict) -> dict:
-    repository = ref.get("repository", {})
-    project = repository.get("project", {})
-    payload = {"id": ref["id"]}
-    if repository:
-        payload["repository"] = {
-            "slug": repository["slug"],
-            "project": {"key": project["key"]},
-        }
-    return payload
-
-
-def reviewer_payload(reviewers: list[dict]) -> list[dict]:
-    payload = []
-    for reviewer in reviewers:
-        user = reviewer.get("user", {})
-        name = user.get("name")
-        if name:
-            payload.append({"user": {"name": name}})
-    return payload
+    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("POST", url, payload, args.auth, args.user)
 
 
 def get_pr(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
-    url = pull_request_url(info, args.pr_id)
-    return api_request("GET", url, None, args.auth, args.user)
+    return api_request("GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)
 
 
 def update_pr(args: argparse.Namespace) -> dict:
@@ -384,90 +236,314 @@ def update_pr(args: argparse.Namespace) -> dict:
     elif args.refresh_description:
         source = args.source or current_branch(args.repo_dir)
         target = args.target or default_target_branch(args.repo_dir, args.remote)
-        payload["description"] = draft_description(args.repo_dir, args.remote, source, target)
-    if args.dry_run:
-        return {"dryRun": True, "url": url, "payload": payload}
-    return api_request("PUT", url, payload, args.auth, args.user)
+        payload["description"] = pr_writer.draft_body(args.repo_dir, args.remote, source, target)
+    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("PUT", url, payload, args.auth, args.user)
+
+
+def pr_changes(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    return api_request("GET", pull_request_url(info, args.pr_id, "changes", {"limit": args.limit}), None, args.auth, args.user)
+
+
+def pr_commits(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    return api_request("GET", pull_request_url(info, args.pr_id, "commits", {"limit": args.limit}), None, args.auth, args.user)
+
+
+def pr_diff(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    path = "diff" + ("/" + urllib.parse.quote(args.path.strip("/"), safe="/") if args.path else "")
+    return api_request("GET", pull_request_url(info, args.pr_id, path, {"contextLines": args.context}), None, args.auth, args.user)
+
+
+def repo_file(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    path = "browse/" + urllib.parse.quote(args.path.strip("/"), safe="/")
+    at = args.at or (f"refs/heads/{args.source}" if args.source else None)
+    return api_request("GET", repo_api_url(info, path, {"at": at, "limit": args.limit}), None, args.auth, args.user)
+
+
+def repo_commit(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    return api_request("GET", repo_api_url(info, "commits/" + urllib.parse.quote(args.commit_id)), None, args.auth, args.user)
+
+
+def branch_name(ref_data: dict) -> str:
+    return str(ref_data.get("displayId") or ref_data.get("id", "")).removeprefix("refs/heads/")
+
+
+def pr_url(pr: dict) -> str:
+    for link in pr.get("links", {}).get("self", []):
+        if link.get("href"):
+            return link["href"]
+    return ""
+
+
+def preview(text: str, limit: int = 1000) -> tuple[str, bool]:
+    return (text, False) if len(text) <= limit else (text[:limit].rstrip() + f"... (truncated, {len(text)} chars total)", True)
+
+
+def summarize_pr(result: dict, action: str, full: bool = False, include_body: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    if result.get("dryRun"):
+        payload = result["payload"]
+        return {
+            "dry_run": {
+                "action": action,
+                "url": result["url"],
+                "title": payload.get("title"),
+                "from": payload.get("fromRef", {}).get("id"),
+                "to": payload.get("toRef", {}).get("id"),
+                "reviewers": len(payload.get("reviewers", [])),
+            },
+            "help": ["Re-run without `--dry-run` to call Bitbucket Server"],
+        }
+    data: dict[str, Any] = {
+        "pull_request": {
+            "action": action,
+            "id": result.get("id", result.get("number", "")),
+            "title": result.get("title"),
+            "state": result.get("state"),
+            "version": result.get("version", ""),
+            "from": branch_name(result.get("fromRef", {})),
+            "to": branch_name(result.get("toRef", {})),
+            "url": pr_url(result),
+        }
+    }
+    if action == "get" and include_body and result.get("description"):
+        body, truncated = preview(str(result["description"]))
+        data["pull_request"]["description"] = body
+        if truncated:
+            data["help"] = ["Run this command again with `--full` for complete TOON output"]
+    return data
+
+
+def summarize_changes(result: dict, pr_id: int, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    values = result.get("values", [])
+    files = []
+    for item in values:
+        path = item.get("path", {})
+        src = item.get("srcPath") or {}
+        files.append({
+            "path": path.get("toString") or path.get("displayId") or path.get("name") or "",
+            "type": item.get("type", ""),
+            "src": src.get("toString", "") if isinstance(src, dict) else "",
+        })
+    data: dict[str, Any] = {"changes": {"pr": pr_id, "count": result.get("size", len(files)), "is_last_page": result.get("isLastPage", True)}, "files": files}
+    if not result.get("isLastPage", True):
+        data["help"] = ["Re-run with a higher `--limit` to include more changed files"]
+    return data
+
+
+def summarize_commits(result: dict, pr_id: int, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    commits = []
+    for item in result.get("values", []):
+        author = item.get("author") or {}
+        commits.append({
+            "id": str(item.get("id", ""))[:12],
+            "message": str(item.get("message", "")).splitlines()[0],
+            "author": author.get("displayName") or author.get("name") or "",
+        })
+    data: dict[str, Any] = {"commits": commits, "page": {"pr": pr_id, "count": result.get("size", len(commits)), "is_last_page": result.get("isLastPage", True)}}
+    if not result.get("isLastPage", True):
+        data["help"] = ["Re-run with a higher `--limit` to include more commits"]
+    return data
+
+
+def diff_lines(result: dict) -> list[str]:
+    lines: list[str] = []
+    for diff in result.get("diffs", []):
+        path = (diff.get("destination") or diff.get("source") or {}).get("toString", "")
+        if path:
+            lines.append(f"diff -- {path}")
+        for hunk in diff.get("hunks", []):
+            if hunk.get("sourceLine") is not None or hunk.get("destinationLine") is not None:
+                lines.append(f"@@ -{hunk.get('sourceLine', '')} +{hunk.get('destinationLine', '')} @@")
+            for segment in hunk.get("segments", []):
+                marker = {"ADDED": "+", "REMOVED": "-", "CONTEXT": " "}.get(segment.get("type"), " ")
+                for line in segment.get("lines", []):
+                    lines.append(marker + str(line.get("line", "")))
+    return lines or [json.dumps(result, separators=(",", ":"))]
+
+
+def summarize_diff(result: dict, pr_id: int, full: bool = False, limit: int = 4000) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    text = "\n".join(diff_lines(result))
+    body, truncated = preview(text, limit)
+    data: dict[str, Any] = {"diff": {"pr": pr_id, "body": body, "chars": len(text)}}
+    if truncated:
+        data["help"] = ["Re-run with `--limit-chars` higher or `--full` for complete TOON output"]
+    return data
+
+
+def summarize_file(result: dict, path: str, full: bool = False, limit: int = 4000) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    lines = [str(line.get("text", "")) for line in result.get("lines", [])]
+    text = "\n".join(lines)
+    body, truncated = preview(text, limit)
+    data: dict[str, Any] = {"file": {"path": path, "body": body, "chars": len(text), "lines": len(lines)}}
+    if truncated or result.get("isLastPage") is False:
+        data["help"] = ["Re-run with `--limit-chars` or `--limit` higher, or use `--full`"]
+    return data
+
+
+def summarize_commit(result: dict, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    author = result.get("author") or {}
+    return {"commit": {"id": str(result.get("id", ""))[:12], "message": str(result.get("message", "")).splitlines()[0], "author": author.get("displayName") or author.get("name") or ""}}
+
+
+def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
+    data: dict[str, Any] = {"tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION}}
+    try:
+        info = repo_info_from_args(argparse.Namespace(base_url=None, project=None, repo=None, repo_dir=repo_dir, remote=remote))
+        data["repo"] = {"base_url": info.base_url, "project": info.project, "repo": info.repo}
+        data["branch"] = {"source": current_branch(repo_dir) or "unknown", "target": default_target_branch(repo_dir, remote)}
+    except RuntimeError:
+        data["repo"] = "unknown"
+    data["commands"] = [
+        {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir ."},
+        {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir ."},
+        {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
+        {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
+        {"name": "commits", "usage": "python3 bitbucket_server_pr.py commits <pr_id> --repo-dir ."},
+        {"name": "create", "usage": "python3 bitbucket_server_pr.py create --repo-dir . --target main --title \"...\""},
+        {"name": "update", "usage": "python3 bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description"},
+    ]
+    return data
+
+
+def help_view() -> dict[str, Any]:
+    return {
+        "tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION},
+        "commands": [
+            {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir . [--body]"},
+            {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir . --limit 100"},
+            {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
+            {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
+            {"name": "commits", "usage": "python3 bitbucket_server_pr.py commits <pr_id> --repo-dir ."},
+            {"name": "commit", "usage": "python3 bitbucket_server_pr.py commit <sha> --repo-dir ."},
+            {"name": "create", "usage": "python3 bitbucket_server_pr.py create --repo-dir . --target main --title \"...\""},
+            {"name": "update", "usage": "python3 bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description"},
+        ],
+        "flags": [
+            {"name": "--repo-dir", "default": ".", "description": "git repository directory"},
+            {"name": "--base-url", "default": "from git remote", "description": "Bitbucket Server base URL"},
+            {"name": "--project", "default": "from git remote", "description": "Bitbucket project key"},
+            {"name": "--repo", "default": "from git remote", "description": "Bitbucket repo slug"},
+            {"name": "--full", "default": "false", "description": "emit complete API result as TOON"},
+        ],
+    }
+
+
+def add_common(p: argparse.ArgumentParser) -> None:
+    p.add_argument("--repo-dir", default=".")
+    p.add_argument("--remote", default="origin")
+    p.add_argument("--source")
+    p.add_argument("--target")
+
+
+def add_api(p: argparse.ArgumentParser) -> None:
+    add_common(p)
+    p.add_argument("--base-url")
+    p.add_argument("--project")
+    p.add_argument("--repo")
+    p.add_argument("--auth", choices=("bearer", "basic"), default="basic")
+    p.add_argument("--user")
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--full", action="store_true")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="bitbucket-helper", description=DESCRIPTION)
-    sub = parser.add_subparsers(dest="cmd")
-
-    def add_common(p: argparse.ArgumentParser) -> None:
-        p.add_argument("--repo-dir", default=".")
-        p.add_argument("--remote", default="origin")
-        p.add_argument("--source")
-        p.add_argument("--target")
-
-    draft = sub.add_parser("draft", help="print a PR description draft")
-    add_common(draft)
-
-    def add_api(p: argparse.ArgumentParser) -> None:
-        add_common(p)
-        p.add_argument("--base-url")
-        p.add_argument("--project")
-        p.add_argument("--repo")
-        p.add_argument("--auth", choices=("bearer", "basic"), default="basic")
-        p.add_argument("--user")
-        p.add_argument("--dry-run", action="store_true")
-        p.add_argument("--json", action="store_true", help="print raw Bitbucket API JSON")
-
-    create = sub.add_parser("create", help="create a Bitbucket Server pull request")
+    parser = Parser(prog="bitbucket_server_pr.py", add_help=False)
+    sub = parser.add_subparsers(dest="cmd", parser_class=Parser)
+    create = sub.add_parser("create", add_help=False)
     add_api(create)
     create.add_argument("--title")
     create.add_argument("--description")
     create.add_argument("--description-file")
     create.add_argument("--reviewers", nargs="*", default=[])
-
-    get = sub.add_parser("get", help="read a Bitbucket Server pull request")
+    get = sub.add_parser("get", add_help=False)
     add_api(get)
     get.add_argument("pr_id", type=int)
-
-    update = sub.add_parser("update", help="update a Bitbucket Server pull request title/description")
+    get.add_argument("--body", action="store_true")
+    update = sub.add_parser("update", add_help=False)
     add_api(update)
     update.add_argument("pr_id", type=int)
     update.add_argument("--title")
     update.add_argument("--description")
     update.add_argument("--description-file")
     update.add_argument("--refresh-description", action="store_true")
+
+    files = sub.add_parser("files", add_help=False)
+    add_api(files)
+    files.add_argument("pr_id", type=int)
+    files.add_argument("--limit", type=int, default=100)
+
+    commits = sub.add_parser("commits", add_help=False)
+    add_api(commits)
+    commits.add_argument("pr_id", type=int)
+    commits.add_argument("--limit", type=int, default=50)
+
+    diff = sub.add_parser("diff", add_help=False)
+    add_api(diff)
+    diff.add_argument("pr_id", type=int)
+    diff.add_argument("--path")
+    diff.add_argument("--context", type=int, default=3)
+    diff.add_argument("--limit-chars", type=int, default=4000)
+
+    file_cmd = sub.add_parser("file", add_help=False)
+    add_api(file_cmd)
+    file_cmd.add_argument("path")
+    file_cmd.add_argument("--at")
+    file_cmd.add_argument("--limit", type=int, default=500)
+    file_cmd.add_argument("--limit-chars", type=int, default=4000)
+
+    commit = sub.add_parser("commit", add_help=False)
+    add_api(commit)
+    commit.add_argument("commit_id")
     return parser
 
 
-def main() -> int:
-    parser = build_parser()
-    args = parser.parse_args()
-    if args.cmd is None:
-        home_view()
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if "--help" in argv:
+        print_toon(help_view())
         return 0
-    if args.cmd == "draft":
-        source = args.source or current_branch(args.repo_dir)
-        target = args.target or default_target_branch(args.repo_dir, args.remote)
-        sys.stdout.write(draft_description(args.repo_dir, args.remote, source, target))
+    if not argv:
+        print_toon(home())
         return 0
-    if args.cmd == "create":
-        result = create_pr(args)
-        if args.json:
-            print(json.dumps(result, indent=2, sort_keys=True))
+    args = build_parser().parse_args(argv)
+    try:
+        if args.cmd == "create":
+            print_toon(summarize_pr(create_pr(args), "create", args.full))
+        elif args.cmd == "get":
+            print_toon(summarize_pr(get_pr(args), "get", args.full, args.body))
+        elif args.cmd == "update":
+            print_toon(summarize_pr(update_pr(args), "update", args.full))
+        elif args.cmd == "files":
+            print_toon(summarize_changes(pr_changes(args), args.pr_id, args.full))
+        elif args.cmd == "commits":
+            print_toon(summarize_commits(pr_commits(args), args.pr_id, args.full))
+        elif args.cmd == "diff":
+            print_toon(summarize_diff(pr_diff(args), args.pr_id, args.full, args.limit_chars))
+        elif args.cmd == "file":
+            print_toon(summarize_file(repo_file(args), args.path, args.full, args.limit_chars))
+        elif args.cmd == "commit":
+            print_toon(summarize_commit(repo_commit(args), args.full))
         else:
-            print_pr_result(result, "create")
+            return error("unknown command", "Run `python3 bitbucket_server_pr.py --help`", 2)
         return 0
-    if args.cmd == "get":
-        result = get_pr(args)
-        if args.json:
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            print_pr_result(result, "get")
-        return 0
-    if args.cmd == "update":
-        result = update_pr(args)
-        if args.json:
-            print(json.dumps(result, indent=2, sort_keys=True))
-        else:
-            print_pr_result(result, "update")
-        return 0
-    parser.error("unknown command")
-    return 2
+    except RuntimeError as exc:
+        return error(str(exc))
 
 
 if __name__ == "__main__":
