@@ -48,6 +48,7 @@ Daily code work.
 - **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
 - **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
 - **[parallel-agents](./skills/engineering/parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
+- **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes with a red-green-refactor loop.
 
 ### Productivity

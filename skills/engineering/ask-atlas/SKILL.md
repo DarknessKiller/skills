@@ -17,7 +17,8 @@ A **flow** is a path through skills. User-invoked skills orchestrate; model-invo
 
 1. **`/grill-me`** — when the idea is still soft, stress-test the plan one question at a time before code.
 2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
-3. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, draft or update it from the local diff.
+3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
+4. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
 
 Keep the request, clarifications, and implementation plan in one context window until the work is split enough to hand off. Clear context between independent tickets or worktrees.
 
@@ -36,6 +37,7 @@ Keep the request, clarifications, and implementation plan in one context window 
 - **`/codebase-design`** — module shape, boundaries, and depth.
 - **`/go`** — Go-specific implementation rules.
 - **`/parallel-agents`** — independent read lanes and safe non-overlapping write lanes.
+- **`/pr-writing`** — standard PR description shape from local git history.
 - **`/git`** — commit and branch hygiene.
 - **`/grilling`** — one-question-at-a-time interview primitive behind `/grill-me`.
 
@@ -44,5 +46,6 @@ Keep the request, clarifications, and implementation plan in one context window 
 - **`/grill-me`** — stateless decision-tree interview for any plan.
 - **`/writing-great-skills`** — reference for editing this skill pack predictably.
 - **`/personal-knowledge`** — search or save personal memory in Blinko.
-- **`/bitbucket-helper`** — self-hosted Bitbucket PR reading, drafting, creating, and updating.
+- **`/pr-writing`** — PR body drafting and refresh from local commits/files.
+- **`/bitbucket-helper`** — self-hosted Bitbucket PR reading, creating, and updating.
 - **`/creating-worktrees`** — worktree creation without polluting shared ignore rules.

@@ -1,0 +1,51 @@
+---
+name: pr-writing
+description: Use when drafting or refreshing pull request descriptions from local git history; when a PR body needs the standard Description, Test Plan, Test Result, Code Risk, Related shape; or when another skill needs a reusable PR-writing helper.
+---
+
+# PR Writing
+
+Draft PR descriptions from local commits and changed files. The helper is pure Python and emits TOON on stdout.
+
+```bash
+python3 skills/engineering/pr-writing/scripts/pr_writer.py
+```
+
+## Process
+
+1. Run the helper with no args or inspect the branch directly. Done when source, target, commits, and changed files are known or missing context is explicit.
+2. Draft with exactly these top-level headings: Description, Test Plan, Test Result, Code Risk, Related. Done when every section is present.
+3. Keep uncertainty inside the sections instead of adding headings. Done when the body is reviewable without pretending tests or risks are known.
+
+## Commands
+
+```bash
+python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir .
+python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --target main
+```
+
+All command output is TOON. The Markdown body is in `pr.body` as an escaped TOON string.
+
+## PR body
+
+```markdown
+## Description
+- What changed and why.
+
+## Test Plan
+- E2E: Planned/not applicable.
+- Unit Tests: Planned/not applicable.
+
+## Test Result
+- E2E: Not run yet.
+- Unit Tests: Not run yet.
+
+## Code Risk
+- Risk: Describe the main review/runtime risk.
+- Rollback: Revert this PR.
+
+## Related
+- PROJ-123 or Not applicable.
+```
+
+Do not add extra top-level headings.

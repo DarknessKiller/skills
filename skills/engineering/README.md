@@ -16,4 +16,5 @@ Daily code work.
 - **[git](./git/SKILL.md)** — Keep diffs and commits reviewable.
 - **[go](./go/SKILL.md)** — Write explicit, context-safe Go.
 - **[parallel-agents](./parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
+- **[pr-writing](./pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
 - **[tdd](./tdd/SKILL.md)** — Drive changes red-green-refactor.
