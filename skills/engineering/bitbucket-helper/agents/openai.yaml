@@ -1,3 +1,3 @@
 interface:
   display_name: "Bitbucket Helper"
-  short_description: "Manage Bitbucket Server PRs with TOON output"
+  short_description: "Manage Bitbucket Server PRs with compact results"

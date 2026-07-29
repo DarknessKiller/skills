@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read, create, and update Bitbucket Server/Data Center pull requests, emitting TOON."""
+"""Read, create, and update Bitbucket Server/Data Center pull requests."""
 
 from __future__ import annotations
 
@@ -300,7 +300,14 @@ def preview(text: str, limit: int = 1000) -> tuple[str, bool]:
     return (text, False) if len(text) <= limit else (text[:limit].rstrip() + f"... (truncated, {len(text)} chars total)", True)
 
 
-def summarize_pr(result: dict, action: str, full: bool = False, include_body: bool = False) -> dict[str, Any]:
+def print_text(text: str) -> None:
+    if text:
+        sys.stdout.write(text)
+        if not text.endswith("\n"):
+            sys.stdout.write("\n")
+
+
+def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any]:
     if full:
         return {"api_result": result}
     if result.get("dryRun"):
@@ -328,11 +335,6 @@ def summarize_pr(result: dict, action: str, full: bool = False, include_body: bo
             "url": pr_url(result),
         }
     }
-    if action == "get" and include_body and result.get("description"):
-        body, truncated = preview(str(result["description"]))
-        data["pull_request"]["description"] = body
-        if truncated:
-            data["help"] = ["Run this command again with `--full` for complete TOON output"]
     return data
 
 
@@ -392,10 +394,9 @@ def summarize_diff(result: dict, pr_id: int, full: bool = False, limit: int = 40
     if full:
         return {"api_result": result}
     text = "\n".join(diff_lines(result))
-    body, truncated = preview(text, limit)
-    data: dict[str, Any] = {"diff": {"pr": pr_id, "body": body, "chars": len(text)}}
-    if truncated:
-        data["help"] = ["Re-run with `--limit-chars` higher or `--full` for complete TOON output"]
+    _, truncated = preview(text, limit)
+    data: dict[str, Any] = {"diff": {"pr": pr_id, "chars": len(text), "truncated": truncated}}
+    data["help"] = ["Re-run with `--format text` to print the diff"]
     return data
 
 
@@ -404,10 +405,11 @@ def summarize_file(result: dict, path: str, full: bool = False, limit: int = 400
         return {"api_result": result}
     lines = [str(line.get("text", "")) for line in result.get("lines", [])]
     text = "\n".join(lines)
-    body, truncated = preview(text, limit)
-    data: dict[str, Any] = {"file": {"path": path, "body": body, "chars": len(text), "lines": len(lines)}}
-    if truncated or result.get("isLastPage") is False:
-        data["help"] = ["Re-run with `--limit-chars` or `--limit` higher, or use `--full`"]
+    _, truncated = preview(text, limit)
+    data: dict[str, Any] = {"file": {"path": path, "chars": len(text), "lines": len(lines), "truncated": truncated}}
+    data["help"] = ["Re-run with `--format text` to print the file"]
+    if result.get("isLastPage") is False:
+        data["help"].append("Use a higher `--limit` to fetch all file lines")
     return data
 
 
@@ -445,12 +447,12 @@ def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
     except RuntimeError:
         data["repo"] = "unknown"
     data["commands"] = [
-        {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir ."},
+        {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir . [--body]"},
         {"name": "review-context", "usage": "python3 bitbucket_server_pr.py review-context <pr_id> --repo-dir ."},
         {"name": "approve", "usage": "python3 bitbucket_server_pr.py approve <pr_id> --repo-dir ."},
         {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir ."},
-        {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
-        {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
+        {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --format text"},
+        {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --format text"},
         {"name": "commits", "usage": "python3 bitbucket_server_pr.py commits <pr_id> --repo-dir ."},
         {"name": "create", "usage": "python3 bitbucket_server_pr.py create --repo-dir . --target main --title \"...\""},
         {"name": "update", "usage": "python3 bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description"},
@@ -458,63 +460,39 @@ def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
     return data
 
 
-def help_view() -> dict[str, Any]:
-    return {
-        "tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION},
-        "commands": [
-            {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir . [--body]"},
-            {"name": "review-context", "usage": "python3 bitbucket_server_pr.py review-context <pr_id> --repo-dir ."},
-            {"name": "approve", "usage": "python3 bitbucket_server_pr.py approve <pr_id> --repo-dir ."},
-            {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir . --limit 100"},
-            {"name": "diff", "usage": "python3 bitbucket_server_pr.py diff <pr_id> --repo-dir . --path <path>"},
-            {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --at refs/heads/main"},
-            {"name": "commits", "usage": "python3 bitbucket_server_pr.py commits <pr_id> --repo-dir ."},
-            {"name": "commit", "usage": "python3 bitbucket_server_pr.py commit <sha> --repo-dir ."},
-            {"name": "create", "usage": "python3 bitbucket_server_pr.py create --repo-dir . --target main --title \"...\""},
-            {"name": "update", "usage": "python3 bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description"},
-        ],
-        "flags": [
-            {"name": "--repo-dir", "default": ".", "description": "git repository directory"},
-            {"name": "--base-url", "default": "from git remote", "description": "Bitbucket Server base URL"},
-            {"name": "--project", "default": "from git remote", "description": "Bitbucket project key"},
-            {"name": "--repo", "default": "from git remote", "description": "Bitbucket repo slug"},
-            {"name": "--full", "default": "false", "description": "emit complete API result as TOON"},
-        ],
-    }
-
-
 def add_common(p: argparse.ArgumentParser) -> None:
-    p.add_argument("--repo-dir", default=".")
-    p.add_argument("--remote", default="origin")
-    p.add_argument("--source")
-    p.add_argument("--target")
+    p.add_argument("--repo-dir", default=".", help="git repository directory (default: .)")
+    p.add_argument("--remote", default="origin", help="git remote (default: origin)")
+    p.add_argument("--source", help="source branch")
+    p.add_argument("--target", help="target branch")
 
 
 def add_api(p: argparse.ArgumentParser) -> None:
     add_common(p)
-    p.add_argument("--base-url")
-    p.add_argument("--project")
-    p.add_argument("--repo")
-    p.add_argument("--auth", choices=("bearer", "basic"), default="basic")
-    p.add_argument("--user")
-    p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--full", action="store_true")
+    p.add_argument("--base-url", help="Bitbucket Server base URL")
+    p.add_argument("--project", help="Bitbucket project key (with --base-url)")
+    p.add_argument("--repo", help="Bitbucket repo slug (with --base-url)")
+    p.add_argument("--auth", choices=("bearer", "basic"), default="basic", help="authentication mode (default: basic)")
+    p.add_argument("--user", help=f"Bitbucket username (default: ${USER_ENV})")
+    p.add_argument("--dry-run", action="store_true", help="show the request without sending it")
+    p.add_argument("--full", action="store_true", help="emit the complete API result")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = Parser(prog="bitbucket_server_pr.py", add_help=False)
-    sub = parser.add_subparsers(dest="cmd", parser_class=Parser)
-    create = sub.add_parser("create", add_help=False)
+    parser = Parser(prog="bitbucket_server_pr.py", description=DESCRIPTION)
+    sub = parser.add_subparsers(dest="cmd", title="Available Commands", parser_class=Parser)
+    create = sub.add_parser("create", help="Create a pull request", description="Create a Bitbucket Server pull request.")
     add_api(create)
     create.add_argument("--title")
     create.add_argument("--description")
     create.add_argument("--description-file")
     create.add_argument("--reviewers", nargs="*", default=[])
-    get = sub.add_parser("get", add_help=False)
+    get = sub.add_parser("get", help="Show pull request metadata", description="Show a Bitbucket Server pull request.")
     add_api(get)
-    get.add_argument("pr_id", type=int)
-    get.add_argument("--body", action="store_true")
-    update = sub.add_parser("update", add_help=False)
+    get.add_argument("pr_id", type=int, help="pull request id")
+    get.add_argument("--body", action="store_true", help="print the description preview as plain Markdown")
+    get.add_argument("--limit-chars", type=int, default=1000, help="description preview limit (default: 1000)")
+    update = sub.add_parser("update", help="Update a pull request", description="Update a Bitbucket Server pull request.")
     add_api(update)
     update.add_argument("pr_id", type=int)
     update.add_argument("--title")
@@ -522,42 +500,44 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--description-file")
     update.add_argument("--refresh-description", action="store_true")
 
-    approve = sub.add_parser("approve", add_help=False)
+    approve = sub.add_parser("approve", help="Approve a pull request", description="Approve a Bitbucket Server pull request.")
     add_api(approve)
     approve.add_argument("pr_id", type=int)
     approve.add_argument("--version", type=int)
 
-    review = sub.add_parser("review-context", add_help=False)
+    review = sub.add_parser("review-context", help="Show PR review context", description="Show pull request metadata, changed files, and commits.")
     add_api(review)
     review.add_argument("pr_id", type=int)
     review.add_argument("--files-limit", type=int, default=100)
     review.add_argument("--commits-limit", type=int, default=50)
 
-    files = sub.add_parser("files", add_help=False)
+    files = sub.add_parser("files", help="List changed files", description="List files changed by a pull request.")
     add_api(files)
     files.add_argument("pr_id", type=int)
     files.add_argument("--limit", type=int, default=100)
 
-    commits = sub.add_parser("commits", add_help=False)
+    commits = sub.add_parser("commits", help="List pull request commits", description="List commits included in a pull request.")
     add_api(commits)
     commits.add_argument("pr_id", type=int)
     commits.add_argument("--limit", type=int, default=50)
 
-    diff = sub.add_parser("diff", add_help=False)
+    diff = sub.add_parser("diff", help="Show a pull request diff", description="Show the diff for a pull request.")
     add_api(diff)
     diff.add_argument("pr_id", type=int)
     diff.add_argument("--path")
     diff.add_argument("--context", type=int, default=3)
     diff.add_argument("--limit-chars", type=int, default=4000)
+    diff.add_argument("--format", choices=("toon", "text"), default="toon", help="output format (default: toon)")
 
-    file_cmd = sub.add_parser("file", add_help=False)
+    file_cmd = sub.add_parser("file", help="Show repository file contents", description="Show a file from a Bitbucket Server repository.")
     add_api(file_cmd)
     file_cmd.add_argument("path")
     file_cmd.add_argument("--at")
     file_cmd.add_argument("--limit", type=int, default=500)
     file_cmd.add_argument("--limit-chars", type=int, default=4000)
+    file_cmd.add_argument("--format", choices=("toon", "text"), default="toon", help="output format (default: toon)")
 
-    commit = sub.add_parser("commit", add_help=False)
+    commit = sub.add_parser("commit", help="Show commit details", description="Show a Bitbucket Server commit.")
     add_api(commit)
     commit.add_argument("commit_id")
     return parser
@@ -565,9 +545,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if "--help" in argv:
-        print_toon(help_view())
-        return 0
     if not argv:
         print_toon(home())
         return 0
@@ -576,7 +553,11 @@ def main(argv: list[str] | None = None) -> int:
         if args.cmd == "create":
             print_toon(summarize_pr(create_pr(args), "create", args.full))
         elif args.cmd == "get":
-            print_toon(summarize_pr(get_pr(args), "get", args.full, args.body))
+            result = get_pr(args)
+            if args.body:
+                print_text(preview(str(result.get("description", "")), args.limit_chars)[0])
+            else:
+                print_toon(summarize_pr(result, "get", args.full))
         elif args.cmd == "update":
             print_toon(summarize_pr(update_pr(args), "update", args.full))
         elif args.cmd == "approve":
@@ -588,9 +569,17 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "commits":
             print_toon(summarize_commits(pr_commits(args), args.pr_id, args.full))
         elif args.cmd == "diff":
-            print_toon(summarize_diff(pr_diff(args), args.pr_id, args.full, args.limit_chars))
+            result = pr_diff(args)
+            if args.format == "text":
+                print_text(preview("\n".join(diff_lines(result)), args.limit_chars)[0])
+            else:
+                print_toon(summarize_diff(result, args.pr_id, args.full, args.limit_chars))
         elif args.cmd == "file":
-            print_toon(summarize_file(repo_file(args), args.path, args.full, args.limit_chars))
+            result = repo_file(args)
+            if args.format == "text":
+                print_text(preview("\n".join(str(line.get("text", "")) for line in result.get("lines", [])), args.limit_chars)[0])
+            else:
+                print_toon(summarize_file(result, args.path, args.full, args.limit_chars))
         elif args.cmd == "commit":
             print_toon(summarize_commit(repo_commit(args), args.full))
         else:

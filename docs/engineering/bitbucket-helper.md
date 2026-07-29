@@ -12,9 +12,9 @@ npx skills update bitbucket-helper
 
 ## What it does
 
-`bitbucket-helper` reads, creates, updates, and approves pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR review context, changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits TOON by default.
+`bitbucket-helper` reads, creates, updates, and approves pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR review context, changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits compact TOON metadata by default.
 
-It is not for Bitbucket Cloud, and it no longer owns PR body writing; use `pr-writing` for that.
+It is not for Bitbucket Cloud, and it no longer owns PR body writing; use `pr-writing` for that. Help output is standard CLI text; command results stay compact TOON.
 
 ## When to reach for it
 
@@ -31,9 +31,9 @@ BB_PASSWORD
 
 ## AXI-shaped Bitbucket API work
 
-Run the helper with no args first. It prints the Python helper path, one-line purpose, inferred repo identity, branch context, and next useful commands as TOON.
+Run the helper with `--help` for clean command documentation. Run it with no args for tool context: it prints the Python helper path, one-line purpose, inferred repo identity, branch context, and next useful commands as TOON.
 
-Default commands return compact TOON summaries. `get <pr_id>` is metadata-only; add `--body` for the PR description preview. For review context, start with `review-context <pr_id>` to fetch PR metadata, changed files, and commits in one command, then use `diff <pr_id> --path <path>` or `file <path> --at <ref>` as needed. Use `approve <pr_id>` only after the user clearly asked for approval. Use `--full` only when the complete Bitbucket API response is necessary.
+Default commands return compact TOON metadata. `get <pr_id>` is metadata-only; add `--body` to fetch a plain Markdown description preview, adjusting `--limit-chars` when needed. `diff` and `file` return metadata by default; add `--format text` to fetch their content without TOON escaping. For review context, start with `review-context <pr_id>` to fetch PR metadata, changed files, and commits in one command, then use `diff <pr_id> --path <path> --format text` or `file <path> --at <ref> --format text` as needed. Use `approve <pr_id>` only after the user clearly asked for approval. Use `--full` only when the complete Bitbucket API response is necessary.
 
 ## PR body boundary
 
@@ -44,7 +44,7 @@ Draft or refresh the description with [pr-writing](https://github.com/darknesski
 - The agent identifies the Server/Data Center repo before mutating anything.
 - Live updates and approvals read the current PR version first.
 - Review reads start with one compact `review-context` call, then stay scoped to the PR id, path, ref, or commit id.
-- Output is TOON.
+- Metadata results are compact TOON; `--help` and explicit content fetches are human-readable text.
 - Full API data appears only when `--full` is requested.
 
 ## Where it fits

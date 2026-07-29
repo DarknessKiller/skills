@@ -5,7 +5,7 @@ description: Use when creating, reading, or updating pull requests for self-host
 
 # Bitbucket Helper
 
-Self-hosted Bitbucket Server/Data Center API work only. Draft PR bodies with `pr-writing`; use this pure Python helper for PRs, changed files, diffs, file contents, commits, and approvals. All stdout is TOON.
+Self-hosted Bitbucket Server/Data Center API work only. Draft PR bodies with `pr-writing`; use this pure Python helper for PRs, changed files, diffs, file contents, commits, and approvals. Metadata results are TOON; `--help` and explicit content fetches use standard human-readable text.
 
 ```bash
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
@@ -35,7 +35,7 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py creat
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description
 ```
 
-Use `--full` only when the compact TOON summary omits data you need.
+Use `--full` only when the compact TOON summary omits data you need. Use `--body` for a plain PR description preview, or `--format text` for diff/file content without embedding it in TOON. Use `--help` for clean command and flag documentation.
 
 ## Auth
 

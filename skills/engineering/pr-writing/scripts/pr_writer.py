@@ -164,13 +164,12 @@ def draft(repo_dir: str, remote: str, source: str | None, target: str | None) ->
         raise RuntimeError("could not determine source branch; pass --source")
     commit_lines = commits(repo_dir, remote, target, source)
     files = changed_files(repo_dir, remote, target, source)
-    body = draft_body(repo_dir, remote, source, target)
     return {
-        "pr": {"source": source, "target": target, "body": body},
+        "pr": {"source": source, "target": target},
         "commits": [{"index": i + 1, "summary": line} for i, line in enumerate(commit_lines[:12])],
         "files": [{"path": path} for path in files[:20]],
         "counts": {"commits": len(commit_lines), "files": len(files)},
-        "help": ["Default draft output is Markdown; use `--format toon` for this context"],
+        "help": ["TOON omits the Markdown body; run without `--format toon` to print it"],
     }
 
 
@@ -188,36 +187,24 @@ def home() -> dict[str, Any]:
     }
 
 
-def help_view() -> dict[str, Any]:
-    return {
-        "tool": {"path": display_path(os.path.abspath(__file__)), "description": DESCRIPTION},
-        "flags": [
-            {"name": "--repo-dir", "default": ".", "description": "git repository directory"},
-            {"name": "--remote", "default": "origin", "description": "git remote used for target comparison"},
-            {"name": "--source", "default": "current branch", "description": "source branch"},
-            {"name": "--target", "default": "remote HEAD", "description": "target branch"},
-        ],
-        "examples": ["python3 pr_writer.py draft --repo-dir . --target main", "python3 pr_writer.py draft --repo-dir . --format toon"],
-    }
-
-
 def build_parser() -> argparse.ArgumentParser:
-    parser = Parser(prog="pr_writer.py", add_help=False)
-    sub = parser.add_subparsers(dest="cmd", parser_class=Parser)
-    draft_cmd = sub.add_parser("draft", add_help=False)
-    draft_cmd.add_argument("--repo-dir", default=".")
-    draft_cmd.add_argument("--remote", default="origin")
-    draft_cmd.add_argument("--source")
-    draft_cmd.add_argument("--target")
-    draft_cmd.add_argument("--format", choices=("markdown", "toon"), default="markdown")
+    parser = Parser(prog="pr_writer.py", description=DESCRIPTION)
+    sub = parser.add_subparsers(dest="cmd", title="Available Commands", parser_class=Parser)
+    draft_cmd = sub.add_parser(
+        "draft",
+        help="Draft a pull request description",
+        description="Draft a reviewable pull request description from local git history.",
+    )
+    draft_cmd.add_argument("--repo-dir", default=".", help="git repository directory (default: .)")
+    draft_cmd.add_argument("--remote", default="origin", help="git remote used for target comparison (default: origin)")
+    draft_cmd.add_argument("--source", help="source branch (default: current branch)")
+    draft_cmd.add_argument("--target", help="target branch (default: remote HEAD)")
+    draft_cmd.add_argument("--format", choices=("markdown", "toon"), default="markdown", help="output format (default: markdown)")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    if "--help" in argv:
-        print_toon(help_view())
-        return 0
     if not argv:
         print_toon(home())
         return 0
@@ -228,7 +215,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.format == "toon":
                 print_toon(data)
             else:
-                sys.stdout.write(data["pr"]["body"])
+                sys.stdout.write(draft_body(args.repo_dir, args.remote, data["pr"]["source"], data["pr"]["target"]))
             return 0
         return error("unknown command", "Run `python3 pr_writer.py --help`", 2)
     except RuntimeError as exc:
