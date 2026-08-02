@@ -1,6 +1,7 @@
 ---
 name: ask-atlas
-description: Ask which skill or flow fits the user's situation.
+description: Ask which Atlas skill or flow fits your situation. A router over Atlas skills and companion skills installed by the dotfiles.
+disable-model-invocation: true
 argument-hint: "What are you trying to do?"
 ---
 
