@@ -9,13 +9,13 @@ argument-hint: "What are you trying to do?"
 
 You don't need to remember every skill. Use this as the map.
 
-This repo owns the Atlas skills. The dotfiles also install Matt Pocock's `/grill-me`, `/grilling`, and `/writing-great-skills` online; reference them, don't copy them here.
+This repo owns the Atlas skills. Additional skills may be installed in the system — reference them by name, don't copy them here.
 
 A **flow** is a path through skills. User-invoked skills orchestrate; model-invoked skills carry reusable discipline.
 
 ## Main flow: request → verified change
 
-1. **`/grill-me`** — when the idea is still soft, stress-test the plan one question at a time before code.
+1. **Stress-test the idea** — when the plan is still soft, use available interview/grilling skills to stress-test before code.
 2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
 3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
 4. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
@@ -39,13 +39,14 @@ Keep the request, clarifications, and implementation plan in one context window 
 - **`/parallel-agents`** — independent read lanes and safe non-overlapping write lanes.
 - **`/pr-writing`** — standard PR description shape from local git history.
 - **`/git`** — commit and branch hygiene.
-- **`/grilling`** — one-question-at-a-time interview primitive behind `/grill-me`.
 
 ## Standalone
 
-- **`/grill-me`** — stateless decision-tree interview for any plan.
-- **`/writing-great-skills`** — reference for editing this skill pack predictably.
 - **`/personal-knowledge`** — search or save personal memory in Blinko.
 - **`/pr-writing`** — PR body drafting and refresh from local commits/files.
 - **`/bitbucket-helper`** — self-hosted Bitbucket PR reading, creating, and updating.
 - **`/creating-worktrees`** — worktree creation without polluting shared ignore rules.
+
+## External skills
+
+Skills from other sources (e.g. Matt Pocock's collection) may be installed in the system. Use them by name — don't duplicate their definitions here.
