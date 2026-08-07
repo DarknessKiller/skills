@@ -27,4 +27,4 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 
 [`ask-atlas`](./skills/engineering/ask-atlas/SKILL.md) is the router that maps user-reachable skills and how they relate. Whenever you add, rename, remove, or change how a user-reachable skill fits the flows, update `ask-atlas` so the map stays accurate.
 
-To link every skill into local harness skill directories, run `scripts/link-skills.sh`. Each entry is a symlink into this repo, so a `git pull` keeps installed skills current; re-run the script after adding, removing, or renaming a skill.
+Install skills with the `npx skills` CLI from the repository URL in `README.md`; do not maintain local symlinks.

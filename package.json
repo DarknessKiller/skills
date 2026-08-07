@@ -21,7 +21,6 @@
     ]
   },
   "scripts": {
-    "list-skills": "scripts/list-skills.sh",
     "changeset": "changeset",
     "version": "changeset version"
   },
