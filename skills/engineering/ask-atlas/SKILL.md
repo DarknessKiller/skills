@@ -16,9 +16,10 @@ A **flow** is a path through skills. User-invoked skills orchestrate; model-invo
 ## Main flow: request → verified change
 
 1. **Stress-test the idea** — when the plan is still soft, use available interview/grilling skills to stress-test before code.
-2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
-3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
-4. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
+2. **`/goal-loop`** — when the goal needs bounded repeated attempts with a self-grill after each round.
+3. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
+4. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
+5. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
 
 Keep the request, clarifications, and implementation plan in one context window until the work is split enough to hand off. Clear context between independent tickets or worktrees.
 

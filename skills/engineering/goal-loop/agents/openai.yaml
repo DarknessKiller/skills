@@ -1,0 +1,5 @@
+interface:
+  display_name: "Goal Loop"
+  short_description: "Iterate toward a goal with bounded self-grilling"
+policy:
+  allow_implicit_invocation: false
