@@ -20,8 +20,12 @@ from typing import Any
 
 PASSWORD_ENV = "BB_PASSWORD"
 USER_ENV = "BB_USER"
+CLOUD_PASSWORD_ENV = "BB_CLOUD_PASSWORD"
+CLOUD_USER_ENV = "BB_CLOUD_USER"
+SERVER_PASSWORD_ENV = "BB_SERVER_PASSWORD"
+SERVER_USER_ENV = "BB_SERVER_USER"
 CLOUD_API = "https://api.bitbucket.org/2.0"
-DESCRIPTION = "Bitbucket Server/Cloud PRs, diffs, commits, approvals; SSH key management via agent"
+DESCRIPTION = "Bitbucket Server/Data Center and Cloud PRs, diffs, commits, and approvals"
 PR_WRITER_PATH = Path(__file__).resolve().parents[2] / "pr-writing" / "scripts" / "pr_writer.py"
 
 spec = importlib.util.spec_from_file_location("pr_writer", PR_WRITER_PATH)
@@ -113,35 +117,6 @@ def print_text(text: str) -> None:
             sys.stdout.write("\n")
 
 
-# ── SSH agent ────────────────────────────────────────────────────────────────
-
-def ssh_agent_public_keys() -> list[str]:
-    """List public keys loaded in the SSH agent."""
-    result = subprocess.run(["ssh-add", "-L"], capture_output=True, text=True, check=False)
-    if result.returncode != 0:
-        raise RuntimeError("ssh-add -L failed — is the SSH agent running? (Bitwarden Desktop Settings → SSH Agent)")
-    keys = [k for k in result.stdout.strip().splitlines() if k.strip()]
-    if not keys:
-        raise RuntimeError("no keys loaded in SSH agent")
-    return keys
-
-
-def get_key_from_agent(index: int = 0) -> str:
-    """Return a single public key from the SSH agent by index."""
-    keys = ssh_agent_public_keys()
-    if index >= len(keys):
-        raise RuntimeError(f"SSH agent has {len(keys)} key(s), index {index} out of range")
-    return keys[index]
-
-
-def read_key_file(path: str) -> str:
-    """Read a public key from a file."""
-    text = Path(path).read_text(encoding="utf-8").strip()
-    if not text.startswith(("ssh-", "ecdsa-", "sk-")):
-        raise RuntimeError(f"{path} does not look like a public key")
-    return text.splitlines()[0]
-
-
 # ── Repo info ────────────────────────────────────────────────────────────────
 
 def infer_repo_info(url: str) -> RepoInfo:
@@ -150,7 +125,7 @@ def infer_repo_info(url: str) -> RepoInfo:
     if normalized.startswith("git@"):
         match = re.match(r"git@([^:]+):/?(.+)$", normalized)
         if not match:
-            raise RuntimeError(f"unsupported ssh remote: {url}")
+            raise RuntimeError(f"unsupported remote URL: {url}")
         host, path = match.group(1), match.group(2)
         if host == "bitbucket.org":
             parts = path.rstrip("/").removesuffix(".git").split("/", 1)
@@ -224,26 +199,33 @@ def pull_request_url(info: RepoInfo, pr_id: int | None = None, path: str = "", p
 
 # ── API ──────────────────────────────────────────────────────────────────────
 
-def token_from_env() -> str:
-    token = os.environ.get(PASSWORD_ENV)
+def auth_env(info: RepoInfo, name: str) -> str:
+    if info.cloud:
+        return {"user": CLOUD_USER_ENV, "password": CLOUD_PASSWORD_ENV}[name]
+    return {"user": SERVER_USER_ENV, "password": SERVER_PASSWORD_ENV}[name]
+
+
+def token_from_env(info: RepoInfo) -> str:
+    token = os.environ.get(auth_env(info, "password")) or os.environ.get(PASSWORD_ENV)
     if not token:
-        raise RuntimeError(f"missing token; set {PASSWORD_ENV}")
+        raise RuntimeError(f"missing password; set {auth_env(info, 'password')} or {PASSWORD_ENV}")
     return token
 
 
-def _auth_headers(auth: str, user: str | None) -> dict[str, str]:
-    token = token_from_env()
+def _auth_headers(info: RepoInfo, auth: str, user: str | None) -> dict[str, str]:
+    token = token_from_env(info)
     if auth == "basic":
-        user = user or os.environ.get(USER_ENV)
+        user_env = auth_env(info, "user")
+        user = user or os.environ.get(user_env) or os.environ.get(USER_ENV)
         if not user:
-            raise RuntimeError(f"--user or {USER_ENV} is required with --auth basic")
+            raise RuntimeError(f"--user or {user_env} or {USER_ENV} is required with --auth basic")
         return {"Authorization": "Basic " + base64.b64encode(f"{user}:{token}".encode()).decode()}
     return {"Authorization": f"Bearer {token}"}
 
 
-def api_request(method: str, url: str, payload: dict | None, auth: str, user: str | None) -> dict:
+def api_request(info: RepoInfo, method: str, url: str, payload: dict | None, auth: str, user: str | None) -> dict:
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
-    headers.update(_auth_headers(auth, user))
+    headers.update(_auth_headers(info, auth, user))
     data = json.dumps(payload).encode() if payload is not None else None
     request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
@@ -256,10 +238,10 @@ def api_request(method: str, url: str, payload: dict | None, auth: str, user: st
         raise RuntimeError(f"Bitbucket API failed: {exc.reason}") from exc
 
 
-def api_request_text(method: str, url: str, auth: str, user: str | None) -> str:
+def api_request_text(info: RepoInfo, method: str, url: str, auth: str, user: str | None) -> str:
     """Make an API request and return raw text (for Cloud diff endpoint)."""
     headers = {"Accept": "text/plain"}
-    headers.update(_auth_headers(auth, user))
+    headers.update(_auth_headers(info, auth, user))
     request = urllib.request.Request(url, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -334,18 +316,18 @@ def create_pr(args: argparse.Namespace) -> dict:
             payload["reviewers"] = [{"user": {"name": name}} for name in args.reviewers]
 
     url = pull_request_url(info)
-    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("POST", url, payload, args.auth, args.user)
+    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request(info, "POST", url, payload, args.auth, args.user)
 
 
 def get_pr(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
-    return api_request("GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)
+    return api_request(info, "GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)
 
 
 def update_pr(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     url = pull_request_url(info, args.pr_id)
-    current = api_request("GET", url, None, args.auth, args.user)
+    current = api_request(info, "GET", url, None, args.auth, args.user)
 
     if info.cloud:
         payload = {
@@ -374,19 +356,19 @@ def update_pr(args: argparse.Namespace) -> dict:
         target = args.target or default_target_branch(args.repo_dir, args.remote)
         payload["description"] = pr_writer.draft_body(args.repo_dir, args.remote, source, target)
 
-    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("PUT", url, payload, args.auth, args.user)
+    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request(info, "PUT", url, payload, args.auth, args.user)
 
 
 def approve_pr(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     if info.cloud:
         url = pull_request_url(info, args.pr_id, "approve")
-        return {"dryRun": True, "url": url, "version": None} if args.dry_run else api_request("POST", url, None, args.auth, args.user)
+        return {"dryRun": True, "url": url, "version": None} if args.dry_run else api_request(info, "POST", url, None, args.auth, args.user)
     version = args.version
     if version is None:
-        version = api_request("GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)["version"]
+        version = api_request(info, "GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)["version"]
     url = pull_request_url(info, args.pr_id, "approve", {"version": version})
-    return {"dryRun": True, "url": url, "version": version} if args.dry_run else api_request("POST", url, None, args.auth, args.user)
+    return {"dryRun": True, "url": url, "version": version} if args.dry_run else api_request(info, "POST", url, None, args.auth, args.user)
 
 
 def review_context(args: argparse.Namespace) -> dict:
@@ -402,22 +384,22 @@ def review_context(args: argparse.Namespace) -> dict:
 def pr_changes(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     if info.cloud:
-        return api_request("GET", pull_request_url(info, args.pr_id, "diffstat", {"pagelen": args.limit}), None, args.auth, args.user)
-    return api_request("GET", pull_request_url(info, args.pr_id, "changes", {"limit": args.limit}), None, args.auth, args.user)
+        return api_request(info, "GET", pull_request_url(info, args.pr_id, "diffstat", {"pagelen": args.limit}), None, args.auth, args.user)
+    return api_request(info, "GET", pull_request_url(info, args.pr_id, "changes", {"limit": args.limit}), None, args.auth, args.user)
 
 
 def pr_commits(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
-    return api_request("GET", pull_request_url(info, args.pr_id, "commits", {"limit": args.limit}), None, args.auth, args.user)
+    return api_request(info, "GET", pull_request_url(info, args.pr_id, "commits", {"limit": args.limit}), None, args.auth, args.user)
 
 
 def pr_diff(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     if info.cloud:
         url = pull_request_url(info, args.pr_id, "diff")
-        return {"_raw_diff": api_request_text("GET", url, args.auth, args.user)}
+        return {"_raw_diff": api_request_text(info, "GET", url, args.auth, args.user)}
     path = "diff" + ("/" + urllib.parse.quote(args.path.strip("/"), safe="/") if args.path else "")
-    return api_request("GET", pull_request_url(info, args.pr_id, path, {"contextLines": args.context}), None, args.auth, args.user)
+    return api_request(info, "GET", pull_request_url(info, args.pr_id, path, {"contextLines": args.context}), None, args.auth, args.user)
 
 
 def repo_file(args: argparse.Namespace) -> dict:
@@ -425,42 +407,16 @@ def repo_file(args: argparse.Namespace) -> dict:
     if info.cloud:
         ref = (args.at or args.source or "main").removeprefix("refs/heads/")
         api_path = f"src/{urllib.parse.quote(ref, safe='')}/{urllib.parse.quote(args.path.strip('/'), safe='/')}"
-        return api_request("GET", repo_api_url(info, api_path), None, args.auth, args.user)
+        return api_request(info, "GET", repo_api_url(info, api_path), None, args.auth, args.user)
     api_path = "browse/" + urllib.parse.quote(args.path.strip("/"), safe="/")
     at = args.at or (f"refs/heads/{args.source}" if args.source else None)
-    return api_request("GET", repo_api_url(info, api_path, {"at": at, "limit": args.limit}), None, args.auth, args.user)
+    return api_request(info, "GET", repo_api_url(info, api_path, {"at": at, "limit": args.limit}), None, args.auth, args.user)
 
 
 def repo_commit(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     endpoint = f"commit/{urllib.parse.quote(args.commit_id)}" if info.cloud else "commits/" + urllib.parse.quote(args.commit_id)
-    return api_request("GET", repo_api_url(info, endpoint), None, args.auth, args.user)
-
-
-# ── SSH key management ───────────────────────────────────────────────────────
-
-def add_ssh_key(args: argparse.Namespace) -> dict:
-    info = repo_info_from_args(args)
-
-    if args.agent:
-        key_text = get_key_from_agent(args.agent_index)
-    elif args.key_file:
-        key_text = read_key_file(args.key_file)
-    elif args.key:
-        key_text = args.key.strip()
-    else:
-        raise RuntimeError("provide --key, --key-file, or --agent")
-
-    label = args.label or "bitbucket-helper"
-
-    if info.cloud:
-        url = repo_api_url(info, "deploy-keys")
-        payload: dict[str, Any] = {"key": key_text, "label": label}
-    else:
-        url = f"{info.base_url}/rest/ssh/1.0/keys"
-        payload = {"text": key_text, "label": label}
-
-    return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request("POST", url, payload, args.auth, args.user)
+    return api_request(info, "GET", repo_api_url(info, endpoint), None, args.auth, args.user)
 
 
 # ── Summarize ────────────────────────────────────────────────────────────────
@@ -607,16 +563,6 @@ def summarize_review_context(result: dict, pr_id: int, full: bool = False) -> di
     return data
 
 
-def summarize_ssh_key(result: dict, full: bool = False) -> dict[str, Any]:
-    if full:
-        return {"api_result": result}
-    if result.get("dryRun"):
-        return {"dry_run": {"url": result["url"], "label": result["payload"].get("label"), "key_preview": result["payload"].get("key", result["payload"].get("text", ""))[:40] + "..."}, "help": ["Re-run without `--dry-run` to add the key"]}
-    key_id = result.get("id") or (result.get("key") or {}).get("id")
-    label = result.get("label") or (result.get("key") or {}).get("label") or ""
-    return {"ssh_key": {"id": key_id, "label": label}}
-
-
 # ── Home ─────────────────────────────────────────────────────────────────────
 
 def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
@@ -638,7 +584,6 @@ def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
         {"name": "file", "usage": "python3 bitbucket_server_pr.py file <path> --repo-dir . --format text"},
         {"name": "commits", "usage": "python3 bitbucket_server_pr.py commits <pr_id> --repo-dir ."},
         {"name": "commit", "usage": "python3 bitbucket_server_pr.py commit <sha> --repo-dir ."},
-        {"name": "ssh-key", "usage": "python3 bitbucket_server_pr.py ssh-key --repo-dir . --agent"},
     ]
     return data
 
@@ -730,13 +675,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_api(commit)
     commit.add_argument("commit_id")
 
-    ssh_key = sub.add_parser("ssh-key", help="Add an SSH public key to Bitbucket")
-    add_api(ssh_key)
-    ssh_key.add_argument("--key", help="SSH public key text (inline)")
-    ssh_key.add_argument("--key-file", help="path to SSH public key file")
-    ssh_key.add_argument("--agent", action="store_true", help="read public key from SSH agent (Bitwarden Desktop)")
-    ssh_key.add_argument("--agent-index", type=int, default=0, help="key index in agent (default: 0)")
-    ssh_key.add_argument("--label", help="key label (default: bitbucket-helper)")
+
 
     return parser
 
@@ -785,8 +724,6 @@ def main(argv: list[str] | None = None) -> int:
                 print_toon(summarize_file(result, args.path, args.full, args.limit_chars))
         elif args.cmd == "commit":
             print_toon(summarize_commit(repo_commit(args), args.full))
-        elif args.cmd == "ssh-key":
-            print_toon(summarize_ssh_key(add_ssh_key(args), args.full))
         else:
             return error("unknown command", "Run `python3 bitbucket_server_pr.py --help`", 2)
         return 0

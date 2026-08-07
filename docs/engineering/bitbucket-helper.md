@@ -12,22 +12,31 @@ npx skills update bitbucket-helper
 
 ## What it does
 
-`bitbucket-helper` reads, creates, updates, and approves pull requests for self-hosted Bitbucket Server/Data Center. It also reads PR review context, changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers Server project/repo from git remotes, and emits compact TOON metadata by default.
-
-It is not for Bitbucket Cloud, and it no longer owns PR body writing; use `pr-writing` for that. Help output is standard CLI text; command results stay compact TOON.
+`bitbucket-helper` reads, creates, updates, and approves pull requests for Bitbucket Server/Data Center and Cloud. It reads PR review context, changed files, targeted diffs, repository file contents, and commits. It uses a pure Python helper, infers the installation type and project/repo from git remotes, and emits compact TOON metadata by default.
 
 ## When to reach for it
 
-Type `/bitbucket-helper`, or let the agent use it when a branch needs a self-hosted Bitbucket PR mutation, an existing PR needs reading/updating, or Cloud-only Bitbucket tooling would be wrong.
+Type `/bitbucket-helper`, or let the agent use it when a branch needs a Bitbucket PR mutation, an existing PR needs reading/updating, or review context is needed.
 
 ## Prerequisites
 
-Live create/update/get/approve calls need:
+Live create/update/get/approve calls need either one shared pair:
 
 ```bash
 BB_USER
 BB_PASSWORD
 ```
+
+or separate credentials for multiple installations:
+
+```bash
+BB_CLOUD_USER
+BB_CLOUD_PASSWORD
+BB_SERVER_USER
+BB_SERVER_PASSWORD
+```
+
+Scoped credentials are selected from the detected installation type and override the shared pair.
 
 ## AXI-shaped Bitbucket API work
 
@@ -37,11 +46,11 @@ Default commands return compact TOON metadata. `get <pr_id>` is metadata-only; a
 
 ## PR body boundary
 
-Draft or refresh the description with [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing). This skill only moves that body through the Bitbucket Server REST API.
+Draft or refresh the description with [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing). This skill only moves that body through the Bitbucket REST API.
 
 ## It's working if
 
-- The agent identifies the Server/Data Center repo before mutating anything.
+- The agent identifies the Bitbucket repo before mutating anything.
 - Live updates and approvals read the current PR version first.
 - Review reads start with one compact `review-context` call, then stay scoped to the PR id, path, ref, or commit id.
 - Metadata results are compact TOON; `--help` and explicit content fetches are human-readable text.
