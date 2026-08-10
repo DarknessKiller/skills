@@ -4,7 +4,7 @@ An Agent Skills pack shaped after Matt Pocock's [`skills`](https://github.com/ma
 
 ## Quickstart
 
-Install into the shared `~/.agents/skills` store only:
+Install/Sync skills from this repo:
 
 ```bash
 npx -y skills@latest add https://github.com/darknesskiller/skills -g -y --full-depth
@@ -14,12 +14,6 @@ Update already-installed skills:
 
 ```bash
 npx -y skills@latest update -g
-```
-
-Sync new skills from this repo too:
-
-```bash
-npx -y skills@latest add https://github.com/darknesskiller/skills -g -y --full-depth
 ```
 
 ## Why this layout
