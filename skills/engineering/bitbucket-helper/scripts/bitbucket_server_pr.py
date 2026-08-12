@@ -65,7 +65,7 @@ def error(message: str, help_text: str | None = None, code: int = 1) -> int:
 
 class Parser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
-        raise SystemExit(error(message, "Run `python3 bitbucket_server_pr.py --help`", 2))
+        raise SystemExit(pr_writer.error(message, pr_writer.usage_help(self, message), 2))
 
 
 def run_git(repo_dir: str, *args: str, check: bool = True) -> str:
@@ -232,10 +232,15 @@ def api_request(info: RepoInfo, method: str, url: str, payload: dict | None, aut
         with urllib.request.urlopen(request, timeout=60) as response:
             return json.loads(response.read().decode())
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")[:500]
-        raise RuntimeError(f"Bitbucket API failed: HTTP {exc.code}: {body}") from exc
+        exc.read()
+        hint = {
+            401: "check Bitbucket credentials",
+            403: "check Bitbucket permissions",
+            404: "check the repository and pull request id",
+        }.get(exc.code, "retry the request or check the Bitbucket URL")
+        raise RuntimeError(f"request failed: HTTP {exc.code}; {hint}") from exc
     except urllib.error.URLError as exc:
-        raise RuntimeError(f"Bitbucket API failed: {exc.reason}") from exc
+        raise RuntimeError("request failed; check the Bitbucket URL and network connection") from exc
 
 
 def api_request_text(info: RepoInfo, method: str, url: str, auth: str, user: str | None) -> str:
@@ -247,10 +252,11 @@ def api_request_text(info: RepoInfo, method: str, url: str, auth: str, user: str
         with urllib.request.urlopen(request, timeout=60) as response:
             return response.read().decode()
     except urllib.error.HTTPError as exc:
-        body = exc.read().decode(errors="replace")[:500]
-        raise RuntimeError(f"Bitbucket API failed: HTTP {exc.code}: {body}") from exc
+        exc.read()
+        hint = "check Bitbucket permissions" if exc.code in (401, 403) else "check the repository, pull request id, and URL"
+        raise RuntimeError(f"request failed: HTTP {exc.code}; {hint}") from exc
     except urllib.error.URLError as exc:
-        raise RuntimeError(f"Bitbucket API failed: {exc.reason}") from exc
+        raise RuntimeError("request failed; check the Bitbucket URL and network connection") from exc
 
 
 # ── PR helpers ───────────────────────────────────────────────────────────────
@@ -302,6 +308,8 @@ def create_pr(args: argparse.Namespace) -> dict:
         }
         if args.reviewers:
             payload["reviewers"] = [{"username": name} for name in args.reviewers]
+        if args.draft:
+            payload["draft"] = True
     else:
         payload = {
             "title": args.title or source,
@@ -314,6 +322,8 @@ def create_pr(args: argparse.Namespace) -> dict:
         }
         if args.reviewers:
             payload["reviewers"] = [{"user": {"name": name}} for name in args.reviewers]
+        if args.draft:
+            payload["draft"] = True
 
     url = pull_request_url(info)
     return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request(info, "POST", url, payload, args.auth, args.user)
@@ -348,6 +358,8 @@ def update_pr(args: argparse.Namespace) -> dict:
 
     if args.title is not None:
         payload["title"] = args.title
+    if args.draft is not None:
+        payload["draft"] = args.draft
     description = read_text_arg(args.description, args.description_file)
     if description is not None:
         payload["description"] = description
@@ -429,7 +441,7 @@ def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any
         from_val = payload.get("fromRef", {}).get("id") or payload.get("source", {}).get("branch", {}).get("name")
         to_val = payload.get("toRef", {}).get("id") or payload.get("destination", {}).get("branch", {}).get("name")
         return {
-            "dry_run": {"action": action, "url": result["url"], "title": payload.get("title"), "from": from_val, "to": to_val, "reviewers": len(payload.get("reviewers", []))},
+            "dry_run": {"action": action, "url": result["url"], "title": payload.get("title"), "draft": payload.get("draft", False), "from": from_val, "to": to_val, "reviewers": len(payload.get("reviewers", []))},
             "help": ["Re-run without `--dry-run` to call Bitbucket"],
         }
     data: dict[str, Any] = {
@@ -438,6 +450,7 @@ def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any
             "id": result.get("id", result.get("number", "")),
             "title": result.get("title"),
             "state": result.get("state"),
+            "draft": result.get("draft"),
             "version": result.get("version", ""),
             "from": branch_name(result.get("fromRef", {})) or result.get("source", {}).get("branch", {}).get("name", ""),
             "to": branch_name(result.get("toRef", {})) or result.get("destination", {}).get("branch", {}).get("name", ""),
@@ -473,8 +486,13 @@ def summarize_changes(result: dict, pr_id: int, full: bool = False) -> dict[str,
                 "added": item.get("lines_added", 0),
                 "removed": item.get("lines_removed", 0),
             })
-    data: dict[str, Any] = {"changes": {"pr": pr_id, "count": result.get("size", len(files)), "is_last_page": result.get("isLastPage", True)}, "files": files}
-    if not result.get("isLastPage", True):
+    count = result.get("size", len(files))
+    data: dict[str, Any] = {"changes": {"pr": pr_id, "count": count, "is_last_page": result.get("isLastPage", True)}, "files": files}
+    if not files:
+        data["help"] = [f"No changed files found for pull request {pr_id}"]
+    elif result.get("isLastPage", True):
+        data["help"] = [f"Run `diff {pr_id} --path <path>` to inspect a file"]
+    else:
         data["help"] = ["Re-run with a higher `--limit` to include more changed files"]
     return data
 
@@ -491,7 +509,9 @@ def summarize_commits(result: dict, pr_id: int, full: bool = False) -> dict[str,
             "author": author.get("displayName") or author.get("display_name") or author.get("name") or "",
         })
     data: dict[str, Any] = {"commits": commits, "page": {"pr": pr_id, "count": result.get("size", len(commits)), "is_last_page": result.get("isLastPage", True)}}
-    if not result.get("isLastPage", True):
+    if not commits:
+        data["help"] = [f"No commits found for pull request {pr_id}"]
+    elif not result.get("isLastPage", True):
         data["help"] = ["Re-run with a higher `--limit` to include more commits"]
     return data
 
@@ -519,9 +539,12 @@ def summarize_diff(result: dict, pr_id: int, full: bool = False, limit: int = 40
         text = result["_raw_diff"]
     else:
         text = "\n".join(diff_lines(result))
-    _, truncated = preview(text, limit)
-    data: dict[str, Any] = {"diff": {"pr": pr_id, "chars": len(text), "truncated": truncated}}
-    data["help"] = ["Re-run with `--format text` to print the diff"]
+    sample, truncated = preview(text, limit)
+    data: dict[str, Any] = {"diff": {"pr": pr_id, "chars": len(text), "truncated": truncated, "preview": sample}}
+    if not text:
+        data["help"] = [f"No diff content found for pull request {pr_id}"]
+    elif truncated:
+        data["help"] = ["Re-run with `--format text` or `--full` to get the complete diff"]
     return data
 
 
@@ -530,11 +553,14 @@ def summarize_file(result: dict, path: str, full: bool = False, limit: int = 400
         return {"api_result": result}
     lines = [str(line.get("text", "")) for line in result.get("lines", [])]
     text = "\n".join(lines)
-    _, truncated = preview(text, limit)
-    data: dict[str, Any] = {"file": {"path": path, "chars": len(text), "lines": len(lines), "truncated": truncated}}
-    data["help"] = ["Re-run with `--format text` to print the file"]
+    sample, truncated = preview(text, limit)
+    data: dict[str, Any] = {"file": {"path": path, "chars": len(text), "lines": len(lines), "truncated": truncated, "preview": sample}}
+    if not text:
+        data["help"] = [f"No content found for `{path}`"]
+    elif truncated:
+        data["help"] = ["Re-run with `--format text` or `--full` to get the complete file"]
     if result.get("isLastPage") is False:
-        data["help"].append("Use a higher `--limit` to fetch all file lines")
+        data.setdefault("help", []).append("Use a higher `--limit` to fetch all file lines")
     return data
 
 
@@ -619,6 +645,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--description")
     create.add_argument("--description-file")
     create.add_argument("--reviewers", nargs="*", default=[])
+    create.add_argument("--draft", action="store_true", help="create as a draft pull request")
 
     get = sub.add_parser("get", help="Show pull request metadata")
     add_api(get)
@@ -632,6 +659,10 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--title")
     update.add_argument("--description")
     update.add_argument("--description-file")
+    draft_state = update.add_mutually_exclusive_group()
+    draft_state.add_argument("--draft", dest="draft", action="store_const", const=True, help="keep the pull request as a draft")
+    draft_state.add_argument("--ready", dest="draft", action="store_const", const=False, help="mark the pull request ready for review")
+    update.set_defaults(draft=None)
     update.add_argument("--refresh-description", action="store_true")
 
     approve = sub.add_parser("approve", help="Approve a pull request")
@@ -684,8 +715,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv in (["-v"], ["-V"], ["--version"]):
+        print(pr_writer.VERSION)
+        return 0
     if not argv:
-        print_toon(home())
+        try:
+            print_toon(home())
+        except (OSError, RuntimeError) as exc:
+            return error(str(exc))
         return 0
     args = build_parser().parse_args(argv)
     try:
@@ -727,7 +764,7 @@ def main(argv: list[str] | None = None) -> int:
         else:
             return error("unknown command", "Run `python3 bitbucket_server_pr.py --help`", 2)
         return 0
-    except RuntimeError as exc:
+    except (OSError, RuntimeError, ValueError) as exc:
         return error(str(exc))
 
 

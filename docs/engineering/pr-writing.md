@@ -12,7 +12,7 @@ npx skills update pr-writing
 
 ## What it does
 
-`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper and emits the Markdown PR body directly by default. Help uses standard CLI text; agents can opt into TOON with `--format toon` when they need branch context.
+`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper and emits the Markdown PR body directly by default. Help uses standard CLI text, `--version` is a fast bare response, and agents can opt into TOON with `--format toon` for compact branch context.
 
 ## When to reach for it
 
@@ -37,6 +37,7 @@ The standard shape is Description, Test Plan, Test Result, Code Risk, Related. U
 - The PR body has exactly the standard top-level headings.
 - `--help` is readable CLI text without TOON table formatting.
 - `--format toon` returns metadata without embedding the multiline Markdown body.
+- Invalid flags return structured stdout and exit code `2` before git access.
 
 ## Where it fits
 
