@@ -42,4 +42,24 @@ assert invalid.returncode == 2
 assert "valid flags" in invalid.stdout
 assert invalid.stderr == ""
 
+create = bitbucket.build_parser().parse_args(["create", "--draft"])
+assert create.draft is True
+update = bitbucket.build_parser().parse_args(["update", "7", "--ready"])
+assert update.draft is False
+
+original_repo_info = bitbucket.repo_info_from_args
+original_api_request = bitbucket.api_request
+bitbucket.repo_info_from_args = lambda args: bitbucket.RepoInfo("https://example.test", "P", "r", True)
+bitbucket.api_request = lambda info, method, url, payload, auth, user: payload if method == "POST" else {"title": "x", "description": "", "source": {}, "destination": {}} if method == "GET" else payload
+created = bitbucket.create_pr(bitbucket.build_parser().parse_args([
+    "create", "--draft", "--description", "x", "--source", "feature", "--target", "main"
+]))
+assert created["draft"] is True
+ready = bitbucket.update_pr(bitbucket.build_parser().parse_args([
+    "update", "7", "--ready", "--description", "x"
+]))
+assert ready["draft"] is False
+bitbucket.repo_info_from_args = original_repo_info
+bitbucket.api_request = original_api_request
+
 print("CLI checks passed")

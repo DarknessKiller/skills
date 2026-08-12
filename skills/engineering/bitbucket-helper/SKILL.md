@@ -33,9 +33,11 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py file 
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py commits <pr_id> --repo-dir .
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py commit <sha> --repo-dir .
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py create --repo-dir . --target main --title "PROJ-123: concise title"
+python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py create --repo-dir . --target main --title "PROJ-123: WIP" --draft
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description
+python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py update <pr_id> --repo-dir . --ready
 
-`--full` for complete API results. `--body` for plain description preview. `--format text` for raw diff/file content. `-v`, `-V`, and `--version` print the bare helper version. Invalid flags fail before API access with structured stdout and exit code `2`.
+`--full` for complete API results. `--body` for plain description preview. `--format text` for raw diff/file content. Use `create --draft` for a draft PR and `update --ready` to mark one ready for review. `-v`, `-V`, and `--version` print the bare helper version. Invalid flags fail before API access with structured stdout and exit code `2`.
 
 ## Auth
 

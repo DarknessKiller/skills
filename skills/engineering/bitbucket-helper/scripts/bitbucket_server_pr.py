@@ -308,6 +308,8 @@ def create_pr(args: argparse.Namespace) -> dict:
         }
         if args.reviewers:
             payload["reviewers"] = [{"username": name} for name in args.reviewers]
+        if args.draft:
+            payload["draft"] = True
     else:
         payload = {
             "title": args.title or source,
@@ -320,6 +322,8 @@ def create_pr(args: argparse.Namespace) -> dict:
         }
         if args.reviewers:
             payload["reviewers"] = [{"user": {"name": name}} for name in args.reviewers]
+        if args.draft:
+            payload["draft"] = True
 
     url = pull_request_url(info)
     return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request(info, "POST", url, payload, args.auth, args.user)
@@ -354,6 +358,8 @@ def update_pr(args: argparse.Namespace) -> dict:
 
     if args.title is not None:
         payload["title"] = args.title
+    if args.draft is not None:
+        payload["draft"] = args.draft
     description = read_text_arg(args.description, args.description_file)
     if description is not None:
         payload["description"] = description
@@ -435,7 +441,7 @@ def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any
         from_val = payload.get("fromRef", {}).get("id") or payload.get("source", {}).get("branch", {}).get("name")
         to_val = payload.get("toRef", {}).get("id") or payload.get("destination", {}).get("branch", {}).get("name")
         return {
-            "dry_run": {"action": action, "url": result["url"], "title": payload.get("title"), "from": from_val, "to": to_val, "reviewers": len(payload.get("reviewers", []))},
+            "dry_run": {"action": action, "url": result["url"], "title": payload.get("title"), "draft": payload.get("draft", False), "from": from_val, "to": to_val, "reviewers": len(payload.get("reviewers", []))},
             "help": ["Re-run without `--dry-run` to call Bitbucket"],
         }
     data: dict[str, Any] = {
@@ -444,6 +450,7 @@ def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any
             "id": result.get("id", result.get("number", "")),
             "title": result.get("title"),
             "state": result.get("state"),
+            "draft": result.get("draft"),
             "version": result.get("version", ""),
             "from": branch_name(result.get("fromRef", {})) or result.get("source", {}).get("branch", {}).get("name", ""),
             "to": branch_name(result.get("toRef", {})) or result.get("destination", {}).get("branch", {}).get("name", ""),
@@ -638,6 +645,7 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--description")
     create.add_argument("--description-file")
     create.add_argument("--reviewers", nargs="*", default=[])
+    create.add_argument("--draft", action="store_true", help="create as a draft pull request")
 
     get = sub.add_parser("get", help="Show pull request metadata")
     add_api(get)
@@ -651,6 +659,10 @@ def build_parser() -> argparse.ArgumentParser:
     update.add_argument("--title")
     update.add_argument("--description")
     update.add_argument("--description-file")
+    draft_state = update.add_mutually_exclusive_group()
+    draft_state.add_argument("--draft", dest="draft", action="store_const", const=True, help="keep the pull request as a draft")
+    draft_state.add_argument("--ready", dest="draft", action="store_const", const=False, help="mark the pull request ready for review")
+    update.set_defaults(draft=None)
     update.add_argument("--refresh-description", action="store_true")
 
     approve = sub.add_parser("approve", help="Approve a pull request")
