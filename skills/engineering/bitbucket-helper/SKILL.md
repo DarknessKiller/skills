@@ -5,7 +5,7 @@ description: Bitbucket pull requests — create, read, update, approve, diff. Au
 
 # Bitbucket Helper
 
-PR operations for Bitbucket Server/Data Center and Cloud. The helper auto-detects the type from the git remote URL (`bitbucket.org` → Cloud, everything else → Server). Draft PR bodies with `pr-writing`; use this for PRs, changed files, diffs, file contents, commits, and approvals.
+PR operations for Bitbucket Server/Data Center and Cloud. The helper auto-detects the type from the git remote URL (`bitbucket.org` → Cloud, everything else → Server). Default metadata is compact TOON with previews for large content, explicit empty states, and actionable next-step hints. Draft PR bodies with `pr-writing`; use this for PRs, changed files, diffs, file contents, commits, and approvals.
 
 ```bash
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
@@ -35,7 +35,7 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py commi
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py create --repo-dir . --target main --title "PROJ-123: concise title"
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description
 
-`--full` for complete API results. `--body` for plain description preview. `--format text` for raw diff/file content.
+`--full` for complete API results. `--body` for plain description preview. `--format text` for raw diff/file content. `-v`, `-V`, and `--version` print the bare helper version. Invalid flags fail before API access with structured stdout and exit code `2`.
 
 ## Auth
 
