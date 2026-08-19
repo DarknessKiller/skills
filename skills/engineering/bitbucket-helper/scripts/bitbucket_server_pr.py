@@ -224,9 +224,12 @@ def _auth_headers(info: RepoInfo, auth: str, user: str | None) -> dict[str, str]
 
 
 def api_request(info: RepoInfo, method: str, url: str, payload: dict | None, auth: str, user: str | None) -> dict:
-    headers = {"Content-Type": "application/json", "Accept": "application/json"}
+    headers = {"Accept": "application/json"}
+    data = None
+    if payload is not None:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps(payload).encode()
     headers.update(_auth_headers(info, auth, user))
-    data = json.dumps(payload).encode() if payload is not None else None
     request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
@@ -283,8 +286,13 @@ def branch_name(ref_data: dict) -> str:
 
 
 def pr_url(pr: dict) -> str:
-    for link in pr.get("links", {}).get("self", []):
-        if link.get("href"):
+    self_link = pr.get("links", {}).get("self", [])
+    if isinstance(self_link, dict):
+        self_link = [self_link]
+    elif isinstance(self_link, str):
+        self_link = [{"href": self_link}]
+    for link in self_link:
+        if isinstance(link, dict) and link.get("href"):
             return link["href"]
     return ""
 
