@@ -12,7 +12,7 @@ npx skills update pr-writing
 
 ## What it does
 
-`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper and emits the Markdown PR body directly by default. Help uses standard CLI text, `--version` is a fast bare response, and agents can opt into TOON with `--format toon` for compact branch context.
+`pr-writing` drafts pull request descriptions from local git history. It uses a pure Python helper, detects generic, frontend, Dart, or Go review profiles, and emits the Markdown PR body directly by default. Help uses standard CLI text, `--version` is a fast bare response, and agents can opt into TOON with `--format toon` for compact branch context.
 
 ## When to reach for it
 
@@ -26,9 +26,9 @@ A local git repository with the target branch available from the configured remo
 
 Run the helper with `--help` for clean command documentation, with no args for tool context, or `draft --repo-dir .` for the Markdown PR body. Use `draft --repo-dir . --format toon` when only source, target, commits, changed files, and counts are needed as machine-readable context; it omits the body to avoid embedding multiline text.
 
-## PR body boundary
+## Profiles and body boundary
 
-The standard shape is Description, Test Plan, Test Result, Code Risk, Related. Unknowns stay inside those sections instead of becoming new headings.
+The standard shape is Description, Test Plan, Test Result, Code Risk, Links, Screenshot. Frontend profiles add build, lint, typecheck, component/E2E, responsive, accessibility, and visual validation prompts. The Dart profile adds `dart format`, `dart analyze`, and `dart test` guidance; Flutter uses the frontend profile. The Go profile adds `gofmt`, `go vet`, and `go test ./...` guidance. The detector recognizes JavaScript frameworks, Dart and Flutter from `pubspec.yaml`, and Go from `go.mod`. Unknowns stay inside those sections instead of becoming new headings.
 
 ## It's working if
 
@@ -39,6 +39,7 @@ The standard shape is Description, Test Plan, Test Result, Code Risk, Related. U
 - `--format toon` returns metadata without embedding the multiline Markdown body.
 - Invalid flags return structured stdout and exit code `2` before git access.
 - Unknown tests or risks remain explicit instead of being invented.
+- The detected profile supplies relevant validation prompts without inventing test results.
 
 ## Where it fits
 

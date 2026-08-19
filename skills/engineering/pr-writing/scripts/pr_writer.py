@@ -14,6 +14,7 @@ from typing import Any
 
 DESCRIPTION = "Draft reviewable pull request descriptions from local git history"
 VERSION = "0.1.0"
+PROFILES = ("generic", "frontend", "dart", "go")
 
 
 def q(value: object) -> str:
@@ -135,13 +136,81 @@ def jira_keys(*texts: str) -> list[str]:
     return keys
 
 
-def draft_body(repo_dir: str, remote: str, source: str, target: str) -> str:
+def detect_framework(repo_dir: str) -> str | None:
+    if (Path(repo_dir) / "go.mod").is_file():
+        return "Go"
+
+    pubspec = Path(repo_dir) / "pubspec.yaml"
+    if pubspec.is_file():
+        try:
+            text = pubspec.read_text()
+        except OSError:
+            text = ""
+        if re.search(r"(?m)^\s*(sdk:\s*flutter|flutter(?:_test|_lints)?\s*:)", text):
+            return "Flutter"
+        return "Dart"
+
+    package = Path(repo_dir) / "package.json"
+    if not package.is_file():
+        return None
+    try:
+        data = json.loads(package.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    dependencies = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+    for framework, markers in (
+        ("Next.js", {"next"}),
+        ("Nuxt", {"nuxt"}),
+        ("Angular", {"@angular/core"}),
+        ("Svelte", {"svelte"}),
+        ("Vue", {"vue"}),
+        ("React", {"react", "react-native"}),
+        ("Preact", {"preact"}),
+        ("Astro", {"astro", "@astrojs/react", "@astrojs/vue"}),
+    ):
+        if markers & dependencies.keys():
+            return framework
+    return None
+
+
+def detect_profile(repo_dir: str) -> str:
+    framework = detect_framework(repo_dir)
+    if framework == "Dart":
+        return "dart"
+    if framework == "Go":
+        return "go"
+    return "frontend" if framework else "generic"
+
+
+def profile_guidance(profile: str, repo_dir: str) -> list[str]:
+    framework = detect_framework(repo_dir)
+    if profile == "dart":
+        return [
+            "<!-- Framework: Detected Dart; verify dart format, dart analyze, and dart test results. -->",
+        ]
+    if profile == "go":
+        return [
+            "<!-- Language: Detected Go; verify gofmt, go vet, and go test ./... results. -->",
+        ]
+    if profile == "frontend":
+        guidance = [
+            "<!-- Framework validation: Run the project's build, lint, typecheck, and relevant component or end-to-end tests. -->",
+            "<!-- Visual validation: Record responsive, accessibility, and visual checks, or explain why they are not applicable. -->",
+        ]
+        if framework:
+            guidance.insert(0, f"<!-- Framework: Detected {framework}; verify the framework-specific behavior and conventions. -->")
+        return guidance
+    return ["<!-- Automated checks: List the relevant tests, lint, typecheck, formatting, or analysis commands. -->"]
+
+
+def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: str | None = None) -> str:
     commit_lines = commits(repo_dir, remote, target, source)
     files = changed_files(repo_dir, remote, target, source)
     keys = jira_keys(source, "\n".join(commit_lines))
+    profile = profile or detect_profile(repo_dir)
     changes = commit_lines[:12] or ["Describe the implementation changes."]
 
-    lines = ["## Description", "- Describe what changed and why.", "", "- Key changes:"]
+    lines = ["## Description", "<!-- Summarize what changed, why, scope, and non-goals. -->", "", "- Key changes:"]
     lines.extend(f"- {line}" for line in changes)
     if files:
         lines.extend(["", "- Files touched:"])
@@ -151,20 +220,29 @@ def draft_body(repo_dir: str, remote: str, source: str, target: str) -> str:
     lines.extend([
         "",
         "## Test Plan",
-        "- E2E: Planned/not applicable.",
-        "- Unit Tests: Planned/not applicable.",
+        "<!-- Give reviewers executable manual or automated test steps. -->",
+        *profile_guidance(profile, repo_dir),
         "",
         "## Test Result",
-        "- E2E: Not run yet.",
-        "- Unit Tests: Not run yet.",
+        "<!-- Record tests, analysis, formatting, and visual validation results. -->",
+        "- Tests: Not run yet.",
         "",
         "## Code Risk",
-        "- Risk: Describe the main review/runtime risk.",
+        "<!-- Describe runtime risk, mitigation, and rollback. -->",
+        "- Risk: Describe the main runtime or review risk.",
+        "- Mitigation: Describe safeguards or monitoring.",
         "- Rollback: Revert this PR.",
         "",
-        "## Related",
+        "## Links",
+        "<!-- Figma, Confluence, Documentation, or related tickets. -->",
     ])
     lines.extend(f"- {key}" for key in keys) if keys else lines.append("- Not applicable.")
+    lines.extend([
+        "",
+        "## Screenshot",
+        "<!-- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant. -->",
+        "- Not applicable.",
+    ])
     return "\n".join(lines) + "\n"
 
 
@@ -224,6 +302,7 @@ def build_parser() -> argparse.ArgumentParser:
     draft_cmd.add_argument("--source", help="source branch (default: current branch)")
     draft_cmd.add_argument("--target", help="target branch (default: remote HEAD)")
     draft_cmd.add_argument("--format", choices=("markdown", "toon"), default="markdown", help="output format (default: markdown)")
+    draft_cmd.add_argument("--profile", choices=PROFILES, help="PR template profile (default: detect from repository)")
     return parser
 
 
@@ -245,7 +324,7 @@ def main(argv: list[str] | None = None) -> int:
             if args.format == "toon":
                 print_toon(data)
             else:
-                sys.stdout.write(draft_body(args.repo_dir, args.remote, data["pr"]["source"], data["pr"]["target"]))
+                sys.stdout.write(draft_body(args.repo_dir, args.remote, data["pr"]["source"], data["pr"]["target"], args.profile))
             return 0
         return error("unknown command", "Run `python3 pr_writer.py --help`", 2)
     except (OSError, RuntimeError, ValueError) as exc:
