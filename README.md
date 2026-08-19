@@ -16,6 +16,12 @@ Update already-installed skills:
 npx -y skills@latest update -g
 ```
 
+Check the pack before publishing changes:
+
+```bash
+npm run check
+```
+
 ## Why this layout
 
 Skills are small, composable runbooks. User-invoked skills orchestrate workflows; model-invoked skills provide reusable discipline the agent can reach for automatically.

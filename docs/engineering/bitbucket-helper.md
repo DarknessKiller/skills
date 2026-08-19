@@ -55,6 +55,7 @@ Draft or refresh the description with [pr-writing](https://github.com/darknesski
 - Review reads start with one compact `review-context` call, then stay scoped to the PR id, path, ref, or commit id.
 - Metadata results are compact TOON; `--help` and explicit content fetches are human-readable text.
 - Full API data appears only when `--full` is requested.
+- Every operation is scoped, authorized when mutable, and closed with a response or blocker.
 
 ## Where it fits
 

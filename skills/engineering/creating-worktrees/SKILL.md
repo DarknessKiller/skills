@@ -28,6 +28,8 @@ Create isolated work under the repo root, not in a global scratch folder.
 6. Initialize CodeGraph only when required.
 7. Report path, branch, local exclude change, and CodeGraph result.
 
+Completion: the worktree exists at the repository-local path, the branch is correct, local exclusion is recorded, and CodeGraph status is reported when applicable.
+
 ## Stop conditions
 
 Stop if the directory is not a git repo, the branch name is missing, local exclude cannot be written, or `git worktree add` fails.

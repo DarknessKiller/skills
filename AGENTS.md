@@ -28,3 +28,5 @@ Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `
 [`ask-atlas`](./skills/engineering/ask-atlas/SKILL.md) is the router that maps user-reachable skills and how they relate. Whenever you add, rename, remove, or change how a user-reachable skill fits the flows, update `ask-atlas` so the map stays accurate.
 
 Install skills with the `npx skills` CLI from the repository URL in `README.md`; do not maintain local symlinks.
+
+Run `npm run check` after changing skill sources, metadata, docs, manifests, or router entries. The check is the completion gate for promoted-surface consistency and invocation parity.

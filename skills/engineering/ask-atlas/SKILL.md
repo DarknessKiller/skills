@@ -15,15 +15,21 @@ A **flow** is a path through skills. User-invoked skills orchestrate; model-invo
 
 ## Main flow: request → verified change
 
-1. **Stress-test the idea** — when the plan is still soft, use available interview/grilling skills to stress-test before code.
+1. **Stress-test the idea** — when the outcome, scope, or acceptance criteria are soft, use `/grilling` for one frontier round at a time. Ask the user, recompute the next frontier after each answer, and do not act until the contract is confirmed.
 2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
 3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
 4. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
+
+The bounded grilling rule is simple: clarify only decisions that can change the next action; once the contract is confirmed, stop grilling and route.
 
 Keep the request, clarifications, and implementation plan in one context window until the work is split enough to hand off. Clear context between independent tickets or worktrees.
 
 ## On-ramps
 
+- **Vague goal or competing approaches** → **`/grilling`**. Use one question round, then wait for answers before changing files.
+- **Need to build or fix code** → **`/implement`**. It owns the verified change.
+- **Need a review** → **`/code-review`**. It discovers the comparison point and reports Standards and Spec separately.
+- **Need a PR description or mutation** → **`/pr-writing`**, then **`/bitbucket-helper`** when the remote is Bitbucket.
 - **Need isolation** → **`/creating-worktrees`**. Create a repo-local `.worktrees/<slug>-<timestamp>` workspace before touching risky or parallel work.
 - **Broad independent work** → **`/parallel-agents`**. Fan out read-only lanes first; use write lanes only when paths cannot overlap.
 - **Something needs design pressure** → **`/codebase-design`**. Use the deep-module vocabulary before changing boundaries: handlers stay thin, services hold business logic, repositories persist.
@@ -39,6 +45,12 @@ Keep the request, clarifications, and implementation plan in one context window 
 - **`/parallel-agents`** — independent read lanes and safe non-overlapping write lanes.
 - **`/pr-writing`** — standard PR description shape from local git history.
 - **`/git`** — commit and branch hygiene.
+
+## Routing boundaries
+
+- Route only; do not implement, edit, or create a PR from this skill.
+- If the request is already a confirmed implementation contract, skip grilling and route directly to `/implement`.
+- If the user asks only for advice, return the smallest useful route and stop.
 
 ## Standalone
 

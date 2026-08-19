@@ -15,3 +15,5 @@ Keep history boring and reviewable.
 - Use `git commit --no-gpg-sign`.
 - Inspect `git status --short` before changing or committing.
 - Never overwrite user work to make history pretty.
+
+Completion: status was inspected, the diff is focused, the subject is conventional and specific, and no user work was overwritten.

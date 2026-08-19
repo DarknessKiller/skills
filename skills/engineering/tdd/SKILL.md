@@ -14,6 +14,8 @@ Use the shortest feedback loop that proves behaviour.
 3. **Refactor** — simplify while the check stays green.
 4. Repeat until the contract is covered.
 
+Completion: every requested behavior has a passing check, the check ran in the repository's normal command, and any untestable edge is reported.
+
 ## Test choice
 
 - Prefer the highest-level test that proves the behaviour without brittle setup.

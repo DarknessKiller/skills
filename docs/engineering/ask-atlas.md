@@ -14,7 +14,7 @@ npx skills update ask-atlas
 
 `ask-atlas` is the router over this skill pack. It turns a vague goal into the next skill to run, without making you remember the whole map.
 
-The defining constraint is that it only routes; it does not implement the work itself.
+The defining constraint is that it only routes; it does not implement the work itself. When scope or acceptance criteria are soft, it starts bounded grilling and waits for confirmation before routing.
 
 ## When to reach for it
 
@@ -22,13 +22,14 @@ You invoke this by typing `/ask-atlas` — the agent won't reach for it on its o
 
 ## The map
 
-The leading word is **flow**. `ask-atlas` separates user-invoked orchestration from model-invoked discipline, then points you at the smallest flow that fits: implement, PR, worktree, parallel agents, personal memory, or codebase design.
+The leading word is **flow**. `ask-atlas` separates user-invoked orchestration from model-invoked discipline, then points you at the smallest flow that fits: grilling, implementation, review, PR, worktree, parallel agents, personal memory, or codebase design.
 
 ## It's working if
 
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
+- Grilling stops once the contract is confirmed; confirmed implementation requests route directly to `/implement`.
 
 ## Where it fits
 

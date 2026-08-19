@@ -38,6 +38,7 @@ The standard shape is Description, Test Plan, Test Result, Code Risk, Related. U
 - `--help` is readable CLI text without TOON table formatting.
 - `--format toon` returns metadata without embedding the multiline Markdown body.
 - Invalid flags return structured stdout and exit code `2` before git access.
+- Unknown tests or risks remain explicit instead of being invented.
 
 ## Where it fits
 

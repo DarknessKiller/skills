@@ -29,6 +29,7 @@ The leading phrase is **deep module**. Handlers translate, services decide, repo
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
+- Each changed behavior has one natural owner and a testable seam.
 
 ## Where it fits
 
