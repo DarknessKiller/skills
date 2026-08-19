@@ -1,6 +1,6 @@
 ---
 name: pr-writing
-description: Use when drafting or refreshing pull request descriptions from local git history; when a PR body needs the standard Description, Test Plan, Test Result, Code Risk, Related shape; or when another skill needs a reusable PR-writing helper.
+description: Use when drafting or refreshing pull request descriptions from local git history; when a PR body needs the standard Description, Test Plan, Test Result, Code Risk, Links, Screenshot shape; or when another skill needs a reusable PR-writing helper.
 ---
 
 # PR Writing
@@ -14,10 +14,10 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py
 ## Process
 
 1. Run the helper with no args or inspect the branch directly. Done when source, target, commits, and changed files are known or missing context is explicit.
-2. Draft with exactly these top-level headings: Description, Test Plan, Test Result, Code Risk, Related. Done when every section is present.
+2. Detect the repository profile or accept an explicit `--profile`; draft with Description, Test Plan, Test Result, Code Risk, and Links, adding Screenshot only for the `frontend` profile. Done when every applicable section is present.
 3. Keep uncertainty inside the sections instead of adding headings. Done when the body is reviewable without pretending tests or risks are known.
 
-Completion: the body has exactly the required headings, every claim is supported by local context, and unknown tests or risks are labeled rather than invented.
+Completion: the body has exactly the applicable headings, the profile matches the repository or explicit override, every claim is supported by local context, and unknown tests or risks are labeled rather than invented.
 
 ## Commands
 
@@ -25,9 +25,14 @@ Completion: the body has exactly the required headings, every claim is supported
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir .
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --target main
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --format toon
+python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --profile frontend
 ```
 
 `draft` outputs the Markdown body directly. Use `--format toon` when an agent needs source, target, commit, file, and count context without the multiline body. TOON includes explicit zero counts and hints when previews are capped. Invalid flags fail before git access with structured stdout and exit code `2`.
+
+## Profiles
+
+The helper detects `frontend` when `package.json` includes common React, Next, Vue, Nuxt, Svelte, Angular, Astro, Preact, or React Native dependencies, detects Flutter from `pubspec.yaml`, uses the explicit `dart` profile for plain Dart, and detects Go from `go.mod`. It reports the detected framework or language in the template. Use `--profile generic`, `--profile frontend`, `--profile dart`, or `--profile go` when repository metadata is incomplete or a different review path is intended. Screenshot is emitted only for frontend work.
 
 ## PR body
 
@@ -36,19 +41,22 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --
 - What changed and why.
 
 ## Test Plan
-- E2E: Planned/not applicable.
-- Unit Tests: Planned/not applicable.
+<!-- Give reviewers executable manual or automated test steps. -->
 
 ## Test Result
-- E2E: Not run yet.
-- Unit Tests: Not run yet.
+<!-- Record tests, analysis, formatting, and visual validation results. -->
 
 ## Code Risk
-- Risk: Describe the main review/runtime risk.
+<!-- Describe runtime risk, mitigation, and rollback. -->
+- Risk: Describe the main runtime or review risk.
+- Mitigation: Describe safeguards or monitoring.
 - Rollback: Revert this PR.
 
-## Related
-- PROJ-123 or Not applicable.
+## Links
+<!-- Figma, Confluence, Documentation, or related tickets. -->
+
+## Screenshot
+<!-- Frontend only: add screenshots or Figma Design Validation output for UI changes. -->
 ```
 
 Do not add extra top-level headings.

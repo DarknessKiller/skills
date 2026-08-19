@@ -14,7 +14,7 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
 ## Process
 
 1. Run the helper with no args in the repo. **Done** when source branch, target branch, project, repo, and helper path are known or the missing piece is explicit.
-2. If the PR body needs drafting, use `pr-writing` first. **Done** when the body has Description, Test Plan, Test Result, Code Risk, Related.
+2. If the PR body needs drafting, use `pr-writing` first. **Done** when the body has Description, Test Plan, Test Result, Code Risk, and Links, plus Screenshot for frontend work.
 3. Before live create/update/approve, confirm unless the user explicitly asked for the mutation. **Done** when intent is clear.
 4. For review context, start with `review-context`; then use targeted `diff --path` or `file` only as needed. **Done** when the next API call is scoped by PR id, path, ref, or commit id.
 5. For updates, read the PR version first and send only mutable fields: title, description, version, fromRef, toRef, reviewer user names. **Done** when read-only fields such as `author` are absent from the payload.

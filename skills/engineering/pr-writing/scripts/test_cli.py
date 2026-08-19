@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -29,6 +31,47 @@ assert pr_writer.emit_toon({"items": [{"id": "1", "title": "Fix"}]}) == [
     "items[1]{id,title}:",
     '  "1","Fix"',
 ]
+
+with tempfile.TemporaryDirectory() as directory:
+    frontend_repo = Path(directory)
+    (frontend_repo / "package.json").write_text(json.dumps({"dependencies": {"next": "1.0.0"}}))
+    assert pr_writer.detect_framework(str(frontend_repo)) == "Next.js"
+    assert pr_writer.detect_profile(str(frontend_repo)) == "frontend"
+    assert pr_writer.profile_guidance("frontend", str(frontend_repo))[0] == "<!-- Framework: Detected Next.js; verify the framework-specific behavior and conventions. -->"
+
+    flutter_repo = frontend_repo / "flutter"
+    flutter_repo.mkdir()
+    (flutter_repo / "pubspec.yaml").write_text("dependencies:\n  flutter:\n    sdk: flutter\n")
+    assert pr_writer.detect_framework(str(flutter_repo)) == "Flutter"
+    assert pr_writer.detect_profile(str(flutter_repo)) == "frontend"
+
+    dart_repo = frontend_repo / "dart"
+    dart_repo.mkdir()
+    (dart_repo / "pubspec.yaml").write_text("name: example\ndependencies:\n  args: ^2.0.0\n")
+    assert pr_writer.detect_framework(str(dart_repo)) == "Dart"
+    assert pr_writer.detect_profile(str(dart_repo)) == "dart"
+    assert pr_writer.profile_guidance("dart", str(dart_repo)) == [
+        "<!-- Framework: Detected Dart; verify dart format, dart analyze, and dart test results. -->",
+    ]
+
+    go_repo = frontend_repo / "go"
+    go_repo.mkdir()
+    (go_repo / "go.mod").write_text("module example.com/project\n\ngo 1.23\n")
+    assert pr_writer.detect_framework(str(go_repo)) == "Go"
+    assert pr_writer.detect_profile(str(go_repo)) == "go"
+    assert pr_writer.profile_guidance("go", str(go_repo)) == [
+        "<!-- Language: Detected Go; verify gofmt, go vet, and go test ./... results. -->",
+    ]
+    assert pr_writer.supports_screenshot("frontend")
+    assert not pr_writer.supports_screenshot("generic")
+    assert not pr_writer.supports_screenshot("dart")
+    assert not pr_writer.supports_screenshot("go")
+
+    generic_repo = frontend_repo / "generic"
+    generic_repo.mkdir()
+    (generic_repo / "package.json").write_text(json.dumps({"dependencies": {"express": "1.0.0"}}))
+    assert pr_writer.detect_framework(str(generic_repo)) is None
+    assert pr_writer.detect_profile(str(generic_repo)) == "generic"
 assert bitbucket.summarize_diff({"_raw_diff": "abcdefghij"}, 7, limit=5)["diff"]["truncated"]
 assert bitbucket.summarize_file({"lines": [{"text": "hello"}]}, "a.txt")["file"]["preview"] == "hello"
 
