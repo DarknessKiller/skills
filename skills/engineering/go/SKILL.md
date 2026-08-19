@@ -17,3 +17,5 @@ Correctness first, standard library first.
 - Match existing project patterns before adding helpers.
 - Add tests for new behaviour.
 - Avoid dependencies unless the standard library or installed packages fall short.
+
+Completion: changed Go code preserves request context, has explicit dependencies and useful errors, follows local package patterns, and passes the narrowest relevant tests.

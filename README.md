@@ -16,6 +16,12 @@ Update already-installed skills:
 npx -y skills@latest update -g
 ```
 
+Check the pack before publishing changes:
+
+```bash
+npm run check
+```
+
 ## Why this layout
 
 Skills are small, composable runbooks. User-invoked skills orchestrate workflows; model-invoked skills provide reusable discipline the agent can reach for automatically.
@@ -35,7 +41,7 @@ Daily code work.
 
 **Model-invoked**
 
-- **[bitbucket-helper](./skills/engineering/bitbucket-helper/SKILL.md)** — Read PRs, files, diffs, commits, and mutate self-hosted Bitbucket Server PRs.
+- **[bitbucket-helper](./skills/engineering/bitbucket-helper/SKILL.md)** — Read PRs, files, diffs, commits, and mutate Bitbucket Server/Data Center or Cloud PRs.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Review a diff on Standards and Spec as separate axes.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Keep modules deep and boundaries clean.
 - **[creating-worktrees](./skills/engineering/creating-worktrees/SKILL.md)** — Create repo-local Git worktrees under `.worktrees/`.

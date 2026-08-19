@@ -14,7 +14,7 @@ npx skills update parallel-agents
 
 `parallel-agents` makes the agent fan out every useful independent lane instead of reading or reviewing broad work serially.
 
-It prefers read-only agents, then allows write agents only when their file sets and API decisions cannot overlap.
+It prefers read-only agents, then allows write agents only when their file sets and API decisions cannot overlap. It describes concurrency in harness-neutral terms and leaves the actual launch mechanism to the runtime.
 
 ## When to reach for it
 
@@ -33,6 +33,7 @@ Read lanes should return file:line evidence and short answers. Write lanes need 
 - Multiple read lanes start together for broad discovery.
 - Write lanes only touch exclusive paths.
 - The final answer separates findings, integrated changes, and checks.
+- Each lane has a unique scope and a checkable completion result.
 
 ## Where it fits
 

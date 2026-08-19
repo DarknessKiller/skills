@@ -27,3 +27,5 @@ Handler → Service → Repository
 ## Design check
 
 A good seam is easy to test through, hides implementation detail, and reduces the number of files future changes must touch.
+
+Completion: each changed behavior has one natural owner, callers cross the intended seam, and the resulting boundary is easier to test than the old one.

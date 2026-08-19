@@ -5,7 +5,7 @@ description: "Review a diff along two axes: Standards (repo rules and code smell
 
 # Code Review
 
-Review the diff between `HEAD` and a fixed point.
+Review the diff between `HEAD` and a fixed point. If none is supplied, discover it in this order: the upstream branch, the merge-base with the likely default branch, then a user question when more than one comparison is plausible.
 
 Keep the two axes separate:
 
@@ -15,15 +15,17 @@ Keep the two axes separate:
 ## Process
 
 1. **Pin the fixed point**
-   - Use the user-supplied commit, branch, tag, or ref.
-   - If none is supplied, ask for one.
-   - Confirm `git rev-parse <fixed-point>` works and `git diff <fixed-point>...HEAD` is non-empty.
+    - Use the user-supplied commit, branch, tag, or ref.
+    - Otherwise inspect the current branch's upstream and likely default branch before asking.
+    - Confirm `git rev-parse <fixed-point>` works and `git diff <fixed-point>...HEAD` is non-empty.
+    - Completion: one valid comparison point is recorded, or the ambiguity is explicit.
 
 2. **Find the spec source**
    - Prefer issue references in commits or branch names.
    - Then check paths the user supplied.
    - Then search `docs/`, `specs/`, `.scratch/`, and PR descriptions.
-   - If no spec exists, the Spec axis reports "no spec available".
+    - If no spec exists, the Spec axis reports "no spec available".
+    - Completion: both axes have a named source or an explicit no-spec result.
 
 3. **Find standards sources**
    - Read `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, `CONTRIBUTING.md`, `CODING_STANDARDS.md`, and relevant skills.
@@ -33,9 +35,11 @@ Keep the two axes separate:
 4. **Run independent review**
    - For meaningful diffs, spawn Standards and Spec sub-agents in parallel.
    - Give each the diff command, commit list, and only the context for its axis.
-   - Do not let one axis rerank or suppress the other.
+    - Do not let one axis rerank or suppress the other.
+    - Completion: every meaningful changed area has been considered on both applicable axes.
 
 5. **Report**
    - Use `## Standards` and `## Spec` headings.
    - Include file/line references and fixes.
-   - End with counts per axis and the worst issue within each axis.
+    - End with counts per axis and the worst issue within each axis.
+    - Completion: the report has `## Standards`, `## Spec`, file/line evidence, fixes, counts, and worst issue per axis.

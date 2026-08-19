@@ -9,7 +9,7 @@ Daily code work.
 
 ## Model-invoked
 
-- **[bitbucket-helper](./bitbucket-helper/SKILL.md)** — Read PRs, files, diffs, commits, and mutate self-hosted Bitbucket Server PRs.
+- **[bitbucket-helper](./bitbucket-helper/SKILL.md)** — Read PRs, files, diffs, commits, and mutate Bitbucket Server/Data Center or Cloud PRs.
 - **[code-review](./code-review/SKILL.md)** — Review a diff on Standards and Spec.
 - **[codebase-design](./codebase-design/SKILL.md)** — Keep modules deep and seams clean.
 - **[creating-worktrees](./creating-worktrees/SKILL.md)** — Create repo-local Git worktrees.

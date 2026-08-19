@@ -12,8 +12,8 @@ Fan out every useful independent lane. The main agent owns decisions, synthesis,
 1. **Slice lanes**
    - Prefer read-only lanes first: one agent per independent question, directory, package, reviewer axis, or search space.
    - A lane is useful only if it has a unique scope and its answer can change the next action.
-   - If lanes are independent, launch them together in one message with `run_in_background: true`.
-   - Completion: every independent unknown has a lane or an explicit reason to stay in the main thread.
+    - If lanes are independent, launch them concurrently when the current harness supports concurrent work. Use that harness's native mechanism; do not assume a tool-specific flag.
+    - Completion: every independent unknown has a lane or an explicit reason to stay in the main thread.
 
 2. **Prompt tightly**
    - Give each agent its lane, read/write mode, allowed paths, forbidden paths, and expected output shape.

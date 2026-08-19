@@ -19,6 +19,8 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
 4. For review context, start with `review-context`; then use targeted `diff --path` or `file` only as needed. **Done** when the next API call is scoped by PR id, path, ref, or commit id.
 5. For updates, read the PR version first and send only mutable fields: title, description, version, fromRef, toRef, reviewer user names. **Done** when read-only fields such as `author` are absent from the payload.
 
+Completion: the operation is scoped to the detected repository and PR/ref/path, mutations are authorized, and the response or blocking prerequisite is reported.
+
 ## Commands
 
 ```bash
@@ -48,7 +50,7 @@ BB_USER
 BB_PASSWORD
 ```
 
-Or keep Cloud and self-hosted credentials separate:
+Or keep Cloud and Server credentials separate:
 
 ```bash
 BB_CLOUD_USER

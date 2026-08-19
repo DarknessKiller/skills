@@ -17,6 +17,8 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py
 2. Draft with exactly these top-level headings: Description, Test Plan, Test Result, Code Risk, Related. Done when every section is present.
 3. Keep uncertainty inside the sections instead of adding headings. Done when the body is reviewable without pretending tests or risks are known.
 
+Completion: the body has exactly the required headings, every claim is supported by local context, and unknown tests or risks are labeled rather than invented.
+
 ## Commands
 
 ```bash

@@ -14,7 +14,7 @@ npx skills update implement
 
 `implement` builds scoped work from a spec, issue, or the current conversation. It owns the path from contract to verified diff.
 
-The defining constraint is feedback: build one slice at a time, use tests where a seam exists, then review before finishing.
+The defining constraint is feedback: pin the contract, build one slice at a time, use tests where a seam exists, then review before finishing. If the plan is soft, use bounded `/grilling` first.
 
 ## When to reach for it
 
@@ -29,6 +29,7 @@ The leading word is **seam**. The skill finds the seam where behaviour can be pr
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
+- Completion criteria, checks, and remaining risks are explicit.
 
 ## Where it fits
 

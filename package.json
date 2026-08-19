@@ -21,6 +21,7 @@
     ]
   },
   "scripts": {
+    "check": "python3 scripts/check_skills.py && python3 scripts/test_check_skills.py && python3 skills/engineering/pr-writing/scripts/test_cli.py",
     "changeset": "changeset",
     "version": "changeset version"
   },

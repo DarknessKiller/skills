@@ -29,6 +29,7 @@ The leading phrase is **propagate context**. Constructors inject dependencies, p
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
+- Context, dependencies, errors, local patterns, and relevant tests are accounted for.
 
 ## Where it fits
 
