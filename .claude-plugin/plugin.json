@@ -24,6 +24,7 @@
     "./skills/engineering/creating-worktrees",
     "./skills/engineering/git",
     "./skills/engineering/go",
+    "./skills/engineering/goal-loop",
     "./skills/engineering/implement",
     "./skills/engineering/parallel-agents",
     "./skills/engineering/pr-writing",

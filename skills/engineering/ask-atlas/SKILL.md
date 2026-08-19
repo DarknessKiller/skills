@@ -16,9 +16,10 @@ A **flow** is a path through skills. User-invoked skills orchestrate; model-invo
 ## Main flow: request → verified change
 
 1. **Stress-test the idea** — when the outcome, scope, or acceptance criteria are soft, use `/grilling` for one frontier round at a time. Ask the user, recompute the next frontier after each answer, and do not act until the contract is confirmed.
-2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
-3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
-4. **`/bitbucket-helper`** — when the branch needs a Bitbucket Server/Data Center or Cloud PR, create or update it through the appropriate REST API.
+2. **`/goal-loop`** — when one pass is unlikely to finish a concrete goal and each round can produce evidence. It bounds action, verification, and internal critique.
+3. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
+4. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
+5. **`/bitbucket-helper`** — when the branch needs a Bitbucket Server/Data Center or Cloud PR, create or update it through the appropriate REST API.
 
 The bounded grilling rule is simple: clarify only decisions that can change the next action; once the contract is confirmed, stop grilling and route.
 
@@ -27,6 +28,7 @@ Keep the request, clarifications, and implementation plan in one context window 
 ## On-ramps
 
 - **Vague goal or competing approaches** → **`/grilling`**. Use one question round, then wait for answers before changing files.
+- **Concrete goal needing repeated verified progress** → **`/goal-loop`**. Default to five rounds; keep the ledger transient and pause before external mutations.
 - **Need to build or fix code** → **`/implement`**. It owns the verified change.
 - **Need a review** → **`/code-review`**. It discovers the comparison point and reports Standards and Spec separately.
 - **Need a PR description or mutation** → **`/pr-writing`**, then **`/bitbucket-helper`** when the remote is Bitbucket.

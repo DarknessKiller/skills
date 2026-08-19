@@ -1,0 +1,5 @@
+interface:
+  display_name: "Goal Loop"
+  short_description: "Advance a goal in bounded verified rounds"
+policy:
+  allow_implicit_invocation: false
