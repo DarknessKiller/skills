@@ -31,7 +31,6 @@ Daily code work.
 **User-invoked**
 
 - **[ask-atlas](./skills/engineering/ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
-- **[goal-loop](./skills/engineering/goal-loop/SKILL.md)** — Iterate toward a goal with bounded self-grilling.
 - **[implement](./skills/engineering/implement/SKILL.md)** — Build scoped work with tests and review.
 
 **Model-invoked**
