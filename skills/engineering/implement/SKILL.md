@@ -40,7 +40,7 @@ Use the smallest loop that proves the change works. The main agent owns decision
 5. **Close out**
    - Summarize changed files and checks.
    - Commit only when the user asked the flow to finish with a commit; use `/git` rules.
-    - If a PR is needed for self-hosted Bitbucket, use `/bitbucket-helper`.
+    - If a PR is needed for Bitbucket Server/Data Center or Cloud, use `/bitbucket-helper`.
     - Completion: the final report names changed files, checks, remaining risks, and any blocked follow-up.
 
 ## Stop conditions

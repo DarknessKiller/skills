@@ -18,7 +18,7 @@ A **flow** is a path through skills. User-invoked skills orchestrate; model-invo
 1. **Stress-test the idea** — when the outcome, scope, or acceptance criteria are soft, use `/grilling` for one frontier round at a time. Ask the user, recompute the next frontier after each answer, and do not act until the contract is confirmed.
 2. **`/implement`** — build scoped work from the current conversation, a spec, or an issue. It keeps ownership in the main agent, uses `/tdd` at seams, runs checks, and closes with `/code-review`.
 3. **`/pr-writing`** — when the branch needs a PR body, draft it from the local diff.
-4. **`/bitbucket-helper`** — when the branch needs a self-hosted Bitbucket Server/Data Center PR, create or update it through Server REST.
+4. **`/bitbucket-helper`** — when the branch needs a Bitbucket Server/Data Center or Cloud PR, create or update it through the appropriate REST API.
 
 The bounded grilling rule is simple: clarify only decisions that can change the next action; once the contract is confirmed, stop grilling and route.
 
@@ -56,7 +56,7 @@ Keep the request, clarifications, and implementation plan in one context window 
 
 - **`/personal-knowledge`** — search or save personal memory in Blinko.
 - **`/pr-writing`** — PR body drafting and refresh from local commits/files.
-- **`/bitbucket-helper`** — self-hosted Bitbucket PR reading, creating, and updating.
+- **`/bitbucket-helper`** — Bitbucket Server/Data Center and Cloud PR reading, creating, and updating.
 - **`/creating-worktrees`** — worktree creation without polluting shared ignore rules.
 
 ## External skills

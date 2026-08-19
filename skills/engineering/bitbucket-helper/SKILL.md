@@ -50,7 +50,7 @@ BB_USER
 BB_PASSWORD
 ```
 
-Or keep Cloud and self-hosted credentials separate:
+Or keep Cloud and Server credentials separate:
 
 ```bash
 BB_CLOUD_USER
