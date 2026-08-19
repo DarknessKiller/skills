@@ -14,10 +14,10 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py
 ## Process
 
 1. Run the helper with no args or inspect the branch directly. Done when source, target, commits, and changed files are known or missing context is explicit.
-2. Detect the repository profile or accept an explicit `--profile`; draft with exactly these top-level headings: Description, Test Plan, Test Result, Code Risk, Links, Screenshot. Done when every section is present.
+2. Detect the repository profile or accept an explicit `--profile`; draft with Description, Test Plan, Test Result, Code Risk, and Links, adding Screenshot only for the `frontend` profile. Done when every applicable section is present.
 3. Keep uncertainty inside the sections instead of adding headings. Done when the body is reviewable without pretending tests or risks are known.
 
-Completion: the body has exactly the required headings, the profile matches the repository or explicit override, every claim is supported by local context, and unknown tests or risks are labeled rather than invented.
+Completion: the body has exactly the applicable headings, the profile matches the repository or explicit override, every claim is supported by local context, and unknown tests or risks are labeled rather than invented.
 
 ## Commands
 
@@ -32,7 +32,7 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --
 
 ## Profiles
 
-The helper detects `frontend` when `package.json` includes common React, Next, Vue, Nuxt, Svelte, Angular, Astro, Preact, or React Native dependencies, detects Flutter from `pubspec.yaml`, uses the explicit `dart` profile for plain Dart, and detects Go from `go.mod`. It reports the detected framework or language in the template. Use `--profile generic`, `--profile frontend`, `--profile dart`, or `--profile go` when repository metadata is incomplete or a different review path is intended.
+The helper detects `frontend` when `package.json` includes common React, Next, Vue, Nuxt, Svelte, Angular, Astro, Preact, or React Native dependencies, detects Flutter from `pubspec.yaml`, uses the explicit `dart` profile for plain Dart, and detects Go from `go.mod`. It reports the detected framework or language in the template. Use `--profile generic`, `--profile frontend`, `--profile dart`, or `--profile go` when repository metadata is incomplete or a different review path is intended. Screenshot is emitted only for frontend work.
 
 ## PR body
 
@@ -56,7 +56,7 @@ The helper detects `frontend` when `package.json` includes common React, Next, V
 <!-- Figma, Confluence, Documentation, or related tickets. -->
 
 ## Screenshot
-<!-- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant. -->
+<!-- Frontend only: add screenshots or Figma Design Validation output for UI changes. -->
 ```
 
 Do not add extra top-level headings.

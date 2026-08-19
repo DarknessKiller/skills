@@ -203,6 +203,10 @@ def profile_guidance(profile: str, repo_dir: str) -> list[str]:
     return ["<!-- Automated checks: List the relevant tests, lint, typecheck, formatting, or analysis commands. -->"]
 
 
+def supports_screenshot(profile: str) -> bool:
+    return profile == "frontend"
+
+
 def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: str | None = None) -> str:
     commit_lines = commits(repo_dir, remote, target, source)
     files = changed_files(repo_dir, remote, target, source)
@@ -237,12 +241,13 @@ def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: st
         "<!-- Figma, Confluence, Documentation, or related tickets. -->",
     ])
     lines.extend(f"- {key}" for key in keys) if keys else lines.append("- Not applicable.")
-    lines.extend([
-        "",
-        "## Screenshot",
-        "<!-- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant. -->",
-        "- Not applicable.",
-    ])
+    if supports_screenshot(profile):
+        lines.extend([
+            "",
+            "## Screenshot",
+            "<!-- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant. -->",
+            "- Not applicable.",
+        ])
     return "\n".join(lines) + "\n"
 
 

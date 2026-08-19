@@ -28,7 +28,7 @@ Run the helper with `--help` for clean command documentation, with no args for t
 
 ## Profiles and body boundary
 
-The standard shape is Description, Test Plan, Test Result, Code Risk, Links, Screenshot. Frontend profiles add build, lint, typecheck, component/E2E, responsive, accessibility, and visual validation prompts. The Dart profile adds `dart format`, `dart analyze`, and `dart test` guidance; Flutter uses the frontend profile. The Go profile adds `gofmt`, `go vet`, and `go test ./...` guidance. The detector recognizes JavaScript frameworks, Dart and Flutter from `pubspec.yaml`, and Go from `go.mod`. Unknowns stay inside those sections instead of becoming new headings.
+The standard shape is Description, Test Plan, Test Result, Code Risk, and Links. Frontend profiles also add Screenshot plus build, lint, typecheck, component/E2E, responsive, accessibility, and visual validation prompts. The Dart profile adds `dart format`, `dart analyze`, and `dart test` guidance; Flutter uses the frontend profile. The Go profile adds `gofmt`, `go vet`, and `go test ./...` guidance. The detector recognizes JavaScript frameworks, Dart and Flutter from `pubspec.yaml`, and Go from `go.mod`. Unknowns stay inside those sections instead of becoming new headings.
 
 ## It's working if
 

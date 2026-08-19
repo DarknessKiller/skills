@@ -62,6 +62,10 @@ with tempfile.TemporaryDirectory() as directory:
     assert pr_writer.profile_guidance("go", str(go_repo)) == [
         "<!-- Language: Detected Go; verify gofmt, go vet, and go test ./... results. -->",
     ]
+    assert pr_writer.supports_screenshot("frontend")
+    assert not pr_writer.supports_screenshot("generic")
+    assert not pr_writer.supports_screenshot("dart")
+    assert not pr_writer.supports_screenshot("go")
 
     generic_repo = frontend_repo / "generic"
     generic_repo.mkdir()
