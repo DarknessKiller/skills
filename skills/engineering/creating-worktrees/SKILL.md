@@ -1,11 +1,9 @@
 ---
 name: creating-worktrees
-description: "Create repo-local Git worktrees under .worktrees/. Use for isolated workspace requests."
+description: "Create repo-local Git worktrees under .worktrees/."
 ---
 
 # Creating Worktrees
-
-Isolated work under repo root, not global scratch.
 
 ## Steps
 
@@ -16,12 +14,5 @@ Isolated work under repo root, not global scratch.
 5. Create: existing branch → `git worktree add <path> <branch>`; new branch → `git worktree add -b <branch> <path>`.
 6. `codegraph init <path>` only when source has `.codegraph/` or user asks. Else `CodeGraph: not applicable`.
 7. Report path, branch, exclude status, CodeGraph result.
-
-## Rules
-
-- Parent: `.worktrees/` at repo root.
-- Path: `<slug>-<YYYYMMDD-HHMMSS>`.
-- Never nested worktree from linked worktree.
-- Never force checkout branch checked out elsewhere.
 
 Completion: worktree exists, branch correct, exclusion recorded, CodeGraph reported.

@@ -1,11 +1,9 @@
 ---
 name: go
-description: "Go standards: context propagation, explicit deps, stdlib-first, wrapped errors. Use when writing or reviewing Go."
+description: "Go standards: context, deps, stdlib, errors."
 ---
 
 # Go
-
-Correctness first. Standard library first.
 
 1. Propagate the existing request context through downstream work.
 2. Use `context.Background()` only at process bootstrap or intentionally detached workers.

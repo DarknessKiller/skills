@@ -1,11 +1,9 @@
 ---
 name: parallel-agents
-description: "Fan out independent read and write lanes. Use for broad discovery, multi-axis review, or non-overlapping edits."
+description: "Fan out independent read and write lanes."
 ---
 
 # Parallel Agents
-
-Fan out independent lanes. Main agent owns decisions, synthesis, report.
 
 ## Steps
 
@@ -13,7 +11,7 @@ Fan out independent lanes. Main agent owns decisions, synthesis, report.
 
 2. **Prompt tightly.** Give each agent: lane, read/write mode, allowed paths, forbidden paths, expected output shape.
 
-3. **Write only when non-overlapping.** Fixed-contract, non-overlapping file sets. IF two lanes might touch same file: keep sequential.
+3. **Write only when non-overlapping.** Fixed-contract, non-overlapping file sets. Two lanes might touch same file: keep sequential.
 
 4. **Keep moving.** While agents run: do local reading, planning, small safe edits. Do not poll.
 
@@ -21,6 +19,4 @@ Fan out independent lanes. Main agent owns decisions, synthesis, report.
 
 ## Rules
 
-- No duplicate lanes. No agents for one-line lookups.
-- Never delegate ownership.
-- Prefer more read agents over more write agents.
+No duplicate lanes. No agents for one-line lookups. Never delegate ownership. Prefer more read agents over more write agents.

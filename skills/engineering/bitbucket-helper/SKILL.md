@@ -1,6 +1,6 @@
 ---
 name: bitbucket-helper
-description: "Bitbucket PR operations: create, read, update, approve, diff. Auto-detects Server vs Cloud."
+description: "Bitbucket PR operations: create, read, update, approve, diff."
 ---
 
 # Bitbucket Helper
@@ -14,7 +14,7 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
 ## Steps
 
 1. Run helper with no args to detect type and PR context. Done when source, target, project, repo known.
-2. IF PR body needed: use `/pr-writing` first. Done when body has Description, Test Plan, Test Result, Code Risk, Links.
+2. PR body needed: use `/pr-writing` first. Done when body has Description, Test Plan, Test Result, Code Risk, Links.
 3. Before live create/update/approve: confirm unless user explicitly asked.
 4. For review: start with `review-context`, then targeted `diff --path` or `file`.
 5. For updates: read PR version first, send only mutable fields (title, description, version, fromRef, toRef, reviewers). Never send `author`.

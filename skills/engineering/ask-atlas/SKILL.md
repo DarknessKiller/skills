@@ -1,13 +1,11 @@
 ---
 name: ask-atlas
-description: "Router over Atlas skills. Tell it your situation; it names the next skill to run."
+description: "Route to the next skill. Tell it your situation; it names the skill."
 disable-model-invocation: true
 argument-hint: "What are you trying to do?"
 ---
 
 # Ask Atlas
-
-The map. A flow is a path through skills.
 
 ## Routing
 
@@ -29,13 +27,3 @@ The map. A flow is a path through skills.
 | Personal memory | `/personal-knowledge` |
 
 Route only. Do not implement from this skill.
-
-## Disciplines
-
-- `/tdd` — red-green-refactor loop.
-- `/code-review` — Standards and Spec axes.
-- `/codebase-design` — module boundaries.
-- `/go` — Go-specific rules.
-- `/parallel-agents` — independent lanes.
-- `/pr-writing` — PR description shape.
-- `/git` — commit hygiene.

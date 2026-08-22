@@ -1,6 +1,6 @@
 ---
 name: decision-drift-guard
-description: "Catch midstream decision changes. Use when a new instruction may replace, contradict, or branch an accepted decision."
+description: "Catch midstream decision changes before plans drift."
 ---
 
 # Decision Drift Guard
@@ -9,7 +9,7 @@ A supersession is a new accepted user decision replacing an earlier one. Make it
 
 ## Steps
 
-1. **Load the ledger.** Path: `.agents/decision-ledger/sessions/<session-id>.md` relative to worktree root. Use host session ID or derive from first request. Each session reads/writes only its own file. IF filesystem fails: keep ledger in context, say persistence unavailable.
+1. **Load the ledger.** Path: `.agents/decision-ledger/sessions/<session-id>.md` relative to worktree root. Use host session ID or derive from first request. Each session reads/writes only its own file. Filesystem fails: keep ledger in context, say persistence unavailable.
 
 2. **Track decisions.** One line per active decision: `D-<n> | scope | chosen approach | acceptance`. Suggestions stay proposed until user accepts.
 
@@ -28,7 +28,7 @@ Watch for: "actually", "instead", "forget that", "on second thought". Compare me
 
 4. **Gate 1** (supersession or conflict only): Show old decision, new instruction, impact. Ask: replace, branch, or refine. Wait for choice.
 
-5. **Gate 2** (after replacement confirmed): IF touches architecture, public behavior, data shape, security, cost, or irreversible actions: run `/grilling` and wait. Otherwise ask only: which old assumption dies, what changes, what must stay.
+5. **Gate 2** (after replacement confirmed): Touches architecture, public behavior, data shape, security, cost, or irreversible actions: run `/grilling` and wait. Otherwise: which old assumption dies, what changes, what must stay.
 
 6. **Commit supersession.** Mark old record superseded. Link new with `supersedes: D-<n>`. Recompute plan, tests, tool actions. Label stale recommendations.
 

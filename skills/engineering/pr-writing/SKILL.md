@@ -1,11 +1,9 @@
 ---
 name: pr-writing
-description: "Draft PR descriptions from local git history. Shape: Description, Test Plan, Test Result, Code Risk, Links."
+description: "Draft PR descriptions from local git history."
 ---
 
 # PR Writing
-
-Draft PR descriptions from local commits and changed files.
 
 ```bash
 python3 skills/engineering/pr-writing/scripts/pr_writer.py
@@ -33,27 +31,3 @@ draft --repo-dir . [--target main] [--format toon] [--profile frontend]
 | `pubspec.yaml` | `flutter` |
 | `go.mod` | `go` |
 | None | `generic` |
-
-## Template
-
-```markdown
-## Description
-- What changed and why.
-
-## Test Plan
-<!-- Manual or automated test steps. -->
-
-## Test Result
-<!-- Tests, analysis, formatting results. -->
-
-## Risk
-- Risk: main runtime or review risk.
-- Mitigation: safeguards or monitoring.
-- Rollback: revert this PR.
-
-## Links
-<!-- Figma, Confluence, tickets. -->
-
-## Screenshot
-<!-- Frontend only. -->
-```
