@@ -19,11 +19,11 @@ argument-hint: "What are you trying to do?"
 | Bitbucket PR | `/bitbucket-helper` |
 | Isolation before risky work | `/creating-worktrees` |
 | Broad independent work | `/parallel-agents` |
-| Split, merge, reshape services | `/codebase-design` |
-| Go code | `/go` |
-| Commit hygiene | `/git` |
+| Split, merge, reshape services, design pressure | `/codebase-design` |
+| Go code, Go function, Go context | `/go` |
+| Commit hygiene, commit message | `/git` |
 | What code does, casual question, rename/typo | `no skill needed` |
-| Vague goal or competing approaches | `/grilling` |
+| Vague goal, competing approaches, grilling | `/grilling` |
 | Personal memory | `/personal-knowledge` |
 
 Route only. Do not implement from this skill.
