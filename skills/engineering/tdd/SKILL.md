@@ -1,11 +1,9 @@
 ---
 name: tdd
-description: Test-driven development with a red-green-refactor loop. Use when implementing new behaviour, fixing bugs, or locking down regressions where a small automated check can prove the change.
+description: "Red-green-refactor loop for new behaviour, bugs, or regressions."
 ---
 
 # TDD
-
-Use the shortest feedback loop that proves behaviour.
 
 ## Loop
 
@@ -14,16 +12,12 @@ Use the shortest feedback loop that proves behaviour.
 3. **Refactor** — simplify while the check stays green.
 4. Repeat until the contract is covered.
 
-Completion: every requested behavior has a passing check, the check ran in the repository's normal command, and any untestable edge is reported.
+## Output
+
+Name every phase: `Red`, `Green`, `Refactor`, `Repeat`. Finish with: `Passing check`, `Normal command`, `Untestable` (none or remaining edge).
+
+Completion: every requested behavior has a passing check, the check ran in the repo's normal command, and any untestable edge is reported.
 
 ## Test choice
 
-- Prefer the highest-level test that proves the behaviour without brittle setup.
-- HTTP paths: prefer request/response tests.
-- Service, repository, or multi-layer behaviour: prefer integration tests when practical.
-- Go: prefer table-driven tests and `testify/require` when the project already uses it.
-- Keep mocks at boundaries. Do not mock code you can run cheaply.
-
-## Boundaries
-
-Do not add a test framework, fixtures, or test helpers for one tiny case. A single `assert`-style self-check is enough when that is the repo's smallest runnable loop.
+Prefer the highest-level test that proves the behaviour without brittle setup. HTTP paths: request/response tests. Service/repository: integration tests when practical. Go: table-driven with `testify/require` if project uses it. Keep mocks at boundaries. Do not mock what you can run cheaply. One `assert`-style self-check suffices for tiny cases.

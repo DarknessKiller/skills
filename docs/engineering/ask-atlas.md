@@ -28,6 +28,7 @@ The leading word is **flow**. `ask-atlas` separates user-invoked orchestration f
 
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
+- Specific skill routes take priority over generic routing; module-split questions use `codebase-design`, while casual questions and trivial edits return `no skill needed`.
 - The next action is smaller and clearer than the original request.
 - Grilling stops once the contract is confirmed; confirmed implementation requests route directly to `/implement`.
 

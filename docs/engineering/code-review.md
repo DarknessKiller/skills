@@ -29,7 +29,7 @@ The leading phrase is **Standards and Spec**. Standards checks repo rules and de
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
-- The comparison point and source for each axis are explicit.
+- The comparison point, files, `## Standards`, `## Spec`, file evidence, counts, and worst issue are explicit.
 
 ## Where it fits
 

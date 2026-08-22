@@ -28,6 +28,7 @@
     "./skills/engineering/implement",
     "./skills/engineering/parallel-agents",
     "./skills/engineering/pr-writing",
-    "./skills/engineering/tdd"
+    "./skills/engineering/tdd",
+    "./skills/productivity/decision-drift-guard"
   ]
 }

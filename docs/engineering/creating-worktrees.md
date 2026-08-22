@@ -29,7 +29,7 @@ The leading phrase is **repo-local**. The skill prevents nested worktrees, times
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
-- The path, branch, local exclusion, and applicable CodeGraph result are explicit.
+- The final report labels the path, branch, sanitized slug, local exclusion, worktree existence, and CodeGraph result.
 
 ## Where it fits
 

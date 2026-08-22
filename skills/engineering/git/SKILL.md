@@ -1,19 +1,15 @@
 ---
 name: git
-description: Git workflow standards. Use when committing, naming branches, staging changes, preparing diffs, or writing commit messages.
+description: "Git workflow: small diffs, Conventional Commits, no-gpg-sign."
 ---
 
 # Git
 
-Keep history boring and reviewable.
-
-## Rules
-
-- Use small, focused diffs.
-- Use Conventional Commits.
-- Keep commit subjects specific.
-- Use `git commit --no-gpg-sign`.
-- Inspect `git status --short` before changing or committing.
-- Never overwrite user work to make history pretty.
+1. Inspect `git status --short` before changing or committing.
+2. Use small, focused diffs.
+3. Use Conventional Commits format.
+4. Keep commit subjects specific.
+5. Use `git commit --no-gpg-sign`.
+6. Preserve user work. Do not overwrite it to make history pretty.
 
 Completion: status was inspected, the diff is focused, the subject is conventional and specific, and no user work was overwritten.

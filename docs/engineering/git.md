@@ -29,7 +29,7 @@ The leading word is **reviewable**. Inspect status first, keep subjects specific
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
-- Status was inspected and the focused diff is ready for review without overwriting user work.
+- Status, focused diff, specific subject, `--no-gpg-sign`, preservation, and overwrite status are explicit.
 
 ## Where it fits
 

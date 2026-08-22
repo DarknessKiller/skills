@@ -1,21 +1,17 @@
 ---
 name: go
-description: Go implementation standards. Use when writing, reviewing, or refactoring Go code.
+description: "Go standards: context, deps, stdlib, errors."
 ---
 
 # Go
 
-Correctness first, standard library first.
-
-## Rules
-
-- Propagate the existing request context through downstream work.
-- Use `context.Background()` only at process bootstrap or intentionally detached workers.
-- Prefer explicit code and constructor injection.
-- Avoid package-level mutable state.
-- Wrap errors with useful context; never silently ignore them.
-- Match existing project patterns before adding helpers.
-- Add tests for new behaviour.
-- Avoid dependencies unless the standard library or installed packages fall short.
+1. Propagate the existing request context through downstream work.
+2. Use `context.Background()` only at process bootstrap or intentionally detached workers.
+3. Prefer explicit code and constructor injection.
+4. Avoid package-level mutable state.
+5. Wrap errors with useful context. Never silently ignore them.
+6. Match existing project patterns before adding helpers.
+7. Add tests for new behaviour.
+8. Avoid dependencies unless the standard library or installed packages fall short.
 
 Completion: changed Go code preserves request context, has explicit dependencies and useful errors, follows local package patterns, and passes the narrowest relevant tests.

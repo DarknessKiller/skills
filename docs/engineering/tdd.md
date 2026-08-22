@@ -29,7 +29,7 @@ The leading phrase is **tight feedback loop**. The skill chooses the highest-lev
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
-- Every requested behavior has a passing check in the repository's normal command, or the gap is reported.
+- Red, Green, Refactor, Repeat, the passing check, normal command, and any untestable edge are explicit.
 
 ## Where it fits
 

@@ -1,26 +1,12 @@
 ---
 name: personal-knowledge
-description: Personal knowledge with Blinko. Use when asked to search personal notes, memories, bookmarks, reminders, owner preferences, recurring personal context, or to remember something.
+description: "Search or save personal memory in Blinko."
 ---
 
 # Personal Knowledge
 
-Use Blinko as the personal memory layer.
+1. Search Blinko with the user's terms and likely synonyms to prevent duplicates.
+2. Summarize only personal facts supported by Blinko. Nothing matched: say so.
+3. User asks to remember: save one concise Blinko note. Use `type: todo` only for tasks; otherwise default to `blinko`.
 
-## Rules
-
-- Search Blinko before saving to avoid duplicates.
-- Save durable personal notes, todos, and bookmarks to Blinko.
-
-## Workflow
-
-1. Search Blinko with the user's terms and likely synonyms.
-2. Summarize only supported personal facts; say when nothing matched.
-3. If the user asks to remember something durable, save one concise Blinko note.
-4. Use `type: todo` only for tasks; otherwise default to `blinko` unless a structured note is clearly better.
-
-Completion: the search result is supported by Blinko, duplicate-saving was avoided, and any written note or ambiguity is named.
-
-## Response shape
-
-Include what personal memory found, whether a Blinko note was written, and any ambiguity.
+Completion: search result supported by Blinko or "nothing matched" stated, duplicate-saving avoided, any written note or ambiguity named.

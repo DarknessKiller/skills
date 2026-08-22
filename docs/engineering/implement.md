@@ -29,7 +29,7 @@ The leading word is **seam**. The skill finds the seam where behaviour can be pr
 - The agent names the right source of truth before acting.
 - The output uses the skill's leading words consistently.
 - The next action is smaller and clearer than the original request.
-- Completion criteria, checks, and remaining risks are explicit.
+- Completion criteria, seam, callers, checks, remaining risks, and blocked follow-up are explicit.
 
 ## Where it fits
 
