@@ -23,7 +23,7 @@ Each bucket folder has a `README.md` that lists every skill in the bucket with a
 
 Skills in `engineering/` and `productivity/` also have a human-facing docs page at `docs/<bucket>/<skill-name>.md`. When you add, rename, or change the behaviour of a promoted skill, create or re-sync its docs page following `.agents/writing-docs.md`. Non-promoted skills get no docs page.
 
-Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`) or model-invoked (omit both). See `.agents/invocation.md`.
+Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`) or model-invoked (omit both). See `.agents/invocation.md`. Follow `.agents/writing-skills.md` for the weak-model-friendly format: one action per step, checklist completion criteria, IF/THEN routing, "When NOT to use" sections, short sentences.
 
 [`ask-atlas`](./skills/engineering/ask-atlas/SKILL.md) is the router that maps user-reachable skills and how they relate. Whenever you add, rename, remove, or change how a user-reachable skill fits the flows, update `ask-atlas` so the map stays accurate.
 

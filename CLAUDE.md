@@ -25,6 +25,8 @@ Skills in `engineering/` and `productivity/` also have a human-facing docs page 
 
 Every `SKILL.md` is either user-invoked (`disable-model-invocation: true` plus `policy.allow_implicit_invocation: false` in `agents/openai.yaml`) or model-invoked (omit both). See `.agents/invocation.md`.
 
+When writing or editing a `SKILL.md`, follow the format rules in `.agents/writing-skills.md`. These rules make skills usable on weaker models (7B-13B class): one action per step, checklist completion criteria, IF/THEN routing, explicit "When NOT to use" sections, and short sentences.
+
 [`ask-atlas`](./skills/engineering/ask-atlas/SKILL.md) is the router that maps user-reachable skills and how they relate. Whenever you add, rename, remove, or change how a user-reachable skill fits the flows, update `ask-atlas` so the map stays accurate.
 
 Install skills with the `npx skills` CLI from the repository URL in `README.md`; do not maintain local symlinks.

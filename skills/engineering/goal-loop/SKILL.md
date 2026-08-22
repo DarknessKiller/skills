@@ -1,50 +1,87 @@
 ---
 name: goal-loop
-description: Advance a concrete goal in bounded verified rounds.
+description: "Advance a concrete goal in bounded verified rounds of action, evidence, and critique."
 disable-model-invocation: true
 argument-hint: "<goal> [max_rounds]"
 ---
 
 # Goal Loop
 
-Run a concrete goal through a bounded loop of action, evidence, and internal critique. The loop owns iteration; existing skills own domain work.
+Run a concrete goal through a bounded loop. Each round is one action, one verification, one critique. The loop owns iteration. Existing skills own domain work.
 
 ## Contract
 
-1. Parse the goal and optional `max_rounds`; default to `5`. Reject a cap that is not a positive integer.
-2. Infer observable completion criteria from the goal and repository context. Proceed with those criteria; record material uncertainty as a blocker only when it prevents a safe next action.
-3. Choose the smallest useful next action and route it through an existing skill when one fits: `/implement`, `/tdd`, `/code-review`, `/git`, or a domain skill.
-4. Verify the action with the narrowest useful check. Evidence is a test result, diff, command output, inspected artifact, or explicit external response.
-5. Internally critique the result:
+1. **Parse the goal and round cap.**
+   - Read the goal from the argument.
+   - Read `max_rounds` from the argument. Default to `5`.
+   - IF `max_rounds` is not a positive integer: reject it and stop.
+
+2. **Infer completion criteria.**
+   - Look at the goal and the repository context.
+   - List observable criteria that prove the goal is done.
+   - IF a criterion is uncertain but does not block the next action: record it and proceed.
+   - IF a criterion is uncertain and blocks the next action: record it as a blocker.
+
+3. **Choose the next action.**
+   - Pick the smallest useful action.
+   - Route it through an existing skill when one fits: `/implement`, `/tdd`, `/code-review`, `/git`, or a domain skill.
+
+4. **Verify the action.**
+   - Run the narrowest useful check.
+   - Evidence is: a test result, a diff, a command output, an inspected artifact, or an explicit external response.
+
+5. **Critique the result.**
    - What evidence proves or disproves completion?
    - What remains unverified or assumed?
    - What is the smallest next action that can change the state?
-6. Stop as soon as the completion criteria are evidenced. Otherwise continue until `max_rounds`.
 
-## Round Boundary
+6. **Check for completion.**
+   - IF the completion criteria are evidenced: stop with `completed`.
+   - IF the round cap is reached: stop with `max_rounds`.
+   - Otherwise: repeat from step 3.
 
-A round is one meaningful state-changing or evidence-producing action followed by verification. Tool calls are implementation details, not rounds. Do not spend rounds restating the goal, polling without a state change, or making speculative cleanup.
+**Done when:**
+- [ ] Completion criteria are listed.
+- [ ] Each round has one action, one verification, and one critique.
+- [ ] The final status is exactly one of: `completed`, `blocked`, `max_rounds`.
+
+## Round boundary
+
+A round is one state-changing or evidence-producing action plus its verification. Tool calls are implementation details, not rounds.
+
+Do NOT spend rounds on:
+- Restating the goal.
+- Polling without a state change.
+- Speculative cleanup.
 
 ## Authorization
 
-Pause before destructive actions or external mutations: commits, pushes, PR creation or approval, deployment, production changes, credential use, or irreversible data operations. State the exact action that needs authorization. Continue with safe local inspection and edits when the contract is clear.
+Pause before these actions. State the exact action that needs authorization.
+
+- Commits, pushes, PR creation or approval.
+- Deployment, production changes.
+- Credential use.
+- Irreversible data operations.
+
+Continue with safe local inspection and edits when the contract is clear.
 
 ## Ledger
 
-Keep a compact in-turn ledger with:
+Keep a compact in-turn ledger:
 
 ```text
 round | action | evidence | critique | next action
 ```
 
-Do not write a repository ledger or personal-memory note. The ledger is transient execution state.
+- The ledger is transient. Do not write it to a file or personal memory.
+- The final response contains the status and the compact ledger.
 
-## Terminal Status
+## Terminal status
 
-End with exactly one status:
+End with exactly one:
 
 - `completed` — completion criteria are evidenced.
-- `blocked` — progress requires missing access, authorization, an unresolved material choice, or a failing external dependency; name the unblocker.
-- `max_rounds` — the cap was reached before completion; name the remaining criteria and strongest evidence.
+- `blocked` — name the unblocker (missing access, authorization, unresolved choice, or failing dependency).
+- `max_rounds` — name the remaining criteria and strongest evidence.
 
-The final response contains the status and compact ledger. Never claim completion from intent, an unchanged command, or an unverified assumption.
+Never claim completion from intent, an unchanged command, or an unverified assumption.
