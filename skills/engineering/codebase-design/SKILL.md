@@ -24,14 +24,6 @@ Handler → Service → Repository
 4. Delete speculative layers, single-use interfaces, and config for values that never vary.
 5. Name domain concepts with words from `CONTEXT.md` when the repo has one.
 
-## Design check
+A good seam is easy to test through, hides implementation detail, and reduces the number of files future changes must touch.
 
-A good seam is:
-- Easy to test through.
-- Hides implementation detail.
-- Reduces the number of files future changes must touch.
-
-**Done when:**
-- [ ] Each changed behavior has one natural owner.
-- [ ] Callers cross the intended seam.
-- [ ] The resulting boundary is easier to test than the old one.
+Completion: each changed behavior has one natural owner, callers cross the intended seam, and the resulting boundary is easier to test than the old one.

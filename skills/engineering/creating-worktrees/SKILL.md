@@ -5,7 +5,7 @@ description: "Create repo-local Git worktrees under .worktrees/. Use when the us
 
 # Creating Worktrees
 
-Create isolated work under the repo root. Do not use a global scratch folder.
+Create isolated work under the repo root, not a global scratch folder.
 
 ## Rules
 
@@ -18,25 +18,13 @@ Create isolated work under the repo root. Do not use a global scratch folder.
 ## Workflow
 
 1. Find the repo root: `git rev-parse --show-toplevel`.
-2. Get the branch or task name. Ask once if missing.
+2. Get the branch or task name; ask once if missing.
 3. Sanitize the slug: replace `/`, spaces, and unusual characters with `-`.
 4. Add `.worktrees/` to `$(git rev-parse --git-path info/exclude)` if missing.
-5. Create the worktree:
-   - IF the branch exists: `git worktree add <path> <branch>`
-   - IF the branch is new: `git worktree add -b <branch> <path>`
-6. IF the source repo has `.codegraph/` or the user explicitly asks: run `codegraph init <path>`.
+5. Create the worktree — existing branch: `git worktree add <path> <branch>`; new branch: `git worktree add -b <branch> <path>`.
+6. Run `codegraph init <path>` only when the source repo has `.codegraph/` or the user explicitly asks.
 7. Report path, branch, local exclude change, and CodeGraph result.
 
-**Done when:**
-- [ ] The worktree exists at the repository-local path.
-- [ ] The branch is correct.
-- [ ] Local exclusion is recorded.
-- [ ] CodeGraph status is reported or "not applicable" is stated.
+Completion: the worktree exists at the repository-local path, the branch is correct, local exclusion is recorded, and CodeGraph status is reported when applicable.
 
-## Stop conditions
-
-Stop if:
-- The directory is not a git repo.
-- The branch name is missing.
-- Local exclude cannot be written.
-- `git worktree add` fails.
+Stop if the directory is not a git repo, the branch name is missing, local exclude cannot be written, or `git worktree add` fails.

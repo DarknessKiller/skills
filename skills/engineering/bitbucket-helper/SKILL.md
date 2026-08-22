@@ -5,12 +5,7 @@ description: "Bitbucket PR operations: create, read, update, approve, diff. Auto
 
 # Bitbucket Helper
 
-PR operations for Bitbucket Server/Data Center and Cloud. The helper auto-detects the type from the git remote URL.
-
-- `bitbucket.org` in remote → Cloud.
-- Anything else in remote → Server.
-
-Draft PR bodies with `/pr-writing`. Use this skill for PRs, changed files, diffs, file contents, commits, and approvals.
+PR operations for Bitbucket Server/Data Center and Cloud. Auto-detects from git remote: `bitbucket.org` → Cloud, everything else → Server. Draft PR bodies with `/pr-writing`. Use this for PRs, changed files, diffs, file contents, commits, and approvals.
 
 ```bash
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
@@ -18,50 +13,13 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
 
 ## Process
 
-1. **Gather context.**
-   - Run the helper with no args in the repo.
+1. Run the helper with no args in the repo. Done when source branch, target branch, project, repo, and helper path are known or the missing piece is explicit.
+2. IF the PR body needs drafting: use `/pr-writing` first. Done when body has Description, Test Plan, Test Result, Code Risk, Links (plus Screenshot for frontend).
+3. Before live create/update/approve: confirm unless the user explicitly asked. Done when intent is clear.
+4. For review context: start with `review-context`, then targeted `diff --path` or `file` only as needed. Done when the next API call is scoped by PR id, path, ref, or commit id.
+5. For updates: read the PR version first, send only mutable fields (title, description, version, fromRef, toRef, reviewer user names). Read-only fields like `author` must be absent.
 
-   **Done when:**
-   - [ ] Source branch is known.
-   - [ ] Target branch is known.
-   - [ ] Project is known.
-   - [ ] Repo is known.
-   - [ ] Helper path is known.
-   - [ ] Or the missing piece is stated explicitly.
-
-2. **Draft the PR body if needed.**
-   - Use `/pr-writing` first.
-
-   **Done when:**
-   - [ ] Body has Description, Test Plan, Test Result, Code Risk, Links.
-   - [ ] Screenshot is included for frontend work.
-
-3. **Confirm mutations.**
-   - Before live create, update, or approve: confirm with the user.
-   - IF the user explicitly asked for the mutation: skip confirmation.
-
-   **Done when:**
-   - [ ] Intent is clear.
-
-4. **Read review context.**
-   - Start with `review-context`.
-   - Use targeted `diff --path` or `file` only as needed.
-
-   **Done when:**
-   - [ ] The next API call is scoped by PR id, path, ref, or commit id.
-
-5. **Update with mutable fields only.**
-   - Read the PR version first.
-   - Send only: title, description, version, fromRef, toRef, reviewer user names.
-   - Do NOT send read-only fields like `author`.
-
-   **Done when:**
-   - [ ] Read-only fields are absent from the payload.
-
-**Completion:**
-- [ ] Operation is scoped to the detected repository and PR/ref/path.
-- [ ] Mutations are authorized.
-- [ ] Response or blocking prerequisite is reported.
+Completion: the operation is scoped to the detected repository and PR/ref/path, mutations are authorized, and the response or blocking prerequisite is reported.
 
 ## Commands
 
@@ -84,37 +42,11 @@ python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py updat
 python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py update <pr_id> --repo-dir . --ready
 ```
 
-Flags:
-- `--full` for complete API results.
-- `--body` for plain description preview.
-- `--format text` for raw diff/file content.
-- `create --draft` for a draft PR.
-- `update --ready` to mark a draft ready for review.
-- `-v`, `-V`, `--version` print the bare helper version.
-- Invalid flags fail before API access with structured stdout and exit code `2`.
+Flags: `--full` for complete API results. `--body` for description preview. `--format text` for raw content. `create --draft` for a draft PR. `update --ready` to mark ready for review. `-v`/`-V`/`--version` print version. Invalid flags fail with exit code `2`.
 
 ## Auth
 
-Use one credential pair for every installation:
-
-```bash
-BB_USER
-BB_PASSWORD
-```
-
-Or keep Cloud and Server separate:
-
-```bash
-BB_CLOUD_USER
-BB_CLOUD_PASSWORD
-BB_SERVER_USER
-BB_SERVER_PASSWORD
-```
-
-Scoped variables win for their type. Generic pair is the fallback.
-
-- **Cloud**: App Password with `Repositories: Read/Write` and `Pull Requests: Read/Write`.
-- **Server**: HTTP password or personal access token.
+One pair for all installations: `BB_USER` / `BB_PASSWORD`. Or scoped: `BB_CLOUD_USER` / `BB_CLOUD_PASSWORD` / `BB_SERVER_USER` / `BB_SERVER_PASSWORD` (scoped win, generic is fallback). Cloud: App Password with Repositories and Pull Requests Read/Write. Server: HTTP password or PAT.
 
 ## Auto-detection
 

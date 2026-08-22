@@ -13,34 +13,11 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py
 
 ## Process
 
-1. **Gather context.**
-   - Run the helper with no args, or inspect the branch directly.
-   - IF context is missing: state what is missing.
+1. Run the helper with no args or inspect the branch directly. Done when source, target, commits, and changed files are known or missing context is explicit.
+2. Detect the repository profile or accept an explicit `--profile`. Draft with Description, Test Plan, Test Result, Code Risk, and Links — add Screenshot only for `frontend`. Keep uncertainty inside sections, not in extra headings.
+3. Every claim must be supported by local context. Unknown tests or risks are labeled, not invented.
 
-   **Done when:**
-   - [ ] Source branch is known.
-   - [ ] Target branch is known.
-   - [ ] Commits are listed.
-   - [ ] Changed files are listed.
-
-2. **Draft the body.**
-   - Detect the repository profile or accept an explicit `--profile`.
-   - Include: Description, Test Plan, Test Result, Code Risk, Links.
-   - Add Screenshot only for the `frontend` profile.
-   - Keep uncertainty inside sections. Do not add extra headings.
-
-   **Done when:**
-   - [ ] Every applicable section is present.
-   - [ ] The body is reviewable without pretending tests or risks are known.
-
-3. **Check claims.**
-   - Every claim must be supported by local context.
-   - Unknown tests or risks are labeled, not invented.
-
-   **Done when:**
-   - [ ] The body has exactly the applicable headings.
-   - [ ] The profile matches the repository or explicit override.
-   - [ ] Unknown tests or risks are labeled.
+Completion: the body has exactly the applicable headings, the profile matches the repo or explicit override, and unknown items are labeled.
 
 ## Commands
 
@@ -51,9 +28,7 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --
 python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --profile frontend
 ```
 
-- `draft` outputs the Markdown body directly.
-- `--format toon` gives source, target, commit, file, and count context without the multiline body.
-- Invalid flags fail before git access with structured stdout and exit code `2`.
+`draft` outputs Markdown directly. `--format toon` gives metadata without the body. Invalid flags fail before git access with exit code `2`.
 
 ## Profiles
 
@@ -64,7 +39,7 @@ python3 skills/engineering/pr-writing/scripts/pr_writer.py draft --repo-dir . --
 | `go.mod` present | `go` |
 | None of the above | `generic` |
 
-Use `--profile generic`, `--profile frontend`, `--profile dart`, or `--profile go` to override.
+Override with `--profile generic|frontend|dart|go`.
 
 ## PR body template
 
