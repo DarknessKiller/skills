@@ -14,10 +14,11 @@ This repo owns the Atlas skills. Other skills may be installed — reference by 
 ## Main flow: request to verified change
 
 1. IF scope or acceptance criteria are soft: use `/grilling` — one question round, then wait. Do not act until the contract is confirmed.
-2. IF one pass is unlikely to finish the goal: use `/goal-loop`.
-3. Use `/implement` to build scoped work. It uses `/tdd` at seams, runs checks, closes with `/code-review`.
-4. IF the branch needs a PR body: use `/pr-writing`.
-5. IF the remote is Bitbucket: use `/bitbucket-helper`.
+2. IF the user changed an earlier accepted decision: use `/decision-drift-guard` before acting.
+3. IF one pass is unlikely to finish the goal: use `/goal-loop`.
+4. Use `/implement` to build scoped work. It uses `/tdd` at seams, runs checks, closes with `/code-review`.
+5. IF the branch needs a PR body: use `/pr-writing`.
+6. IF the remote is Bitbucket: use `/bitbucket-helper`.
 
 Route only. Do not implement, edit, or create a PR from this skill.
 
@@ -36,6 +37,7 @@ Route only. Do not implement, edit, or create a PR from this skill.
 | Needs design pressure on boundaries | `/codebase-design` |
 | Is writing Go code | `/go` |
 | Needs commit hygiene | `/git` |
+| Changed an earlier decision midstream | `/decision-drift-guard` |
 | Needs personal memory search/save | `/personal-knowledge` |
 
 IF the request is already a confirmed implementation contract: skip grilling, route directly to `/implement`. IF the user asks only for advice: return the smallest useful route and stop.

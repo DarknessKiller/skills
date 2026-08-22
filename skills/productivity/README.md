@@ -8,4 +8,4 @@ Daily non-code workflow tools.
 
 ## Model-invoked
 
-- None yet.
+- **[decision-drift-guard](./decision-drift-guard/SKILL.md)** — Catch midstream decision changes before plans drift.

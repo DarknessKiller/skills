@@ -62,7 +62,7 @@ Non-code workflow tools.
 
 **Model-invoked**
 
-- None yet.
+- **[decision-drift-guard](./skills/productivity/decision-drift-guard/SKILL.md)** — Catch midstream decision changes before plans drift.
 
 ## Buckets
 
