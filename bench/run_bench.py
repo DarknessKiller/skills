@@ -34,6 +34,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -43,11 +44,24 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCENARIOS_DEFAULT = Path(__file__).parent / "scenarios.jsonl"
 
-ALL_SKILL_SLASHES = [
-    "/grilling", "/goal-loop", "/implement", "/code-review",
-    "/pr-writing", "/bitbucket", "/creating-worktrees", "/parallel-agents",
-    "/codebase-design", "/go", "/git", "/tdd",
-]
+ROUTE_SKILL_SLASHES = {
+    # The old snapshot predates decision-drift-guard.
+    "old": [
+        "/grilling", "/goal-loop", "/implement", "/code-review",
+        "/pr-writing", "/bitbucket-helper", "/creating-worktrees",
+        "/parallel-agents", "/codebase-design", "/go", "/git", "/tdd",
+        "/personal-knowledge",
+    ],
+    "new": [
+        "/grilling", "/goal-loop", "/implement", "/code-review",
+        "/pr-writing", "/bitbucket-helper", "/creating-worktrees",
+        "/parallel-agents", "/codebase-design", "/go", "/git", "/tdd",
+        "/personal-knowledge", "/decision-drift-guard",
+    ],
+}
+
+# Backwards-compatible name for callers importing the scoring helper.
+ALL_SKILL_SLASHES = ROUTE_SKILL_SLASHES["new"]
 
 
 # ---------------------------------------------------------------------------
@@ -55,11 +69,15 @@ ALL_SKILL_SLASHES = [
 # ---------------------------------------------------------------------------
 
 def skill_path(skill_name: str) -> Path | None:
-    for bucket in ("engineering", "personal"):
+    for bucket in ("engineering", "productivity", "personal"):
         p = ROOT / "skills" / bucket / skill_name / "SKILL.md"
         if p.is_file():
             return p
     return None
+
+
+def scenario_applies_to_format(scenario: dict, fmt: str) -> bool:
+    return fmt in scenario.get("formats", ("old", "new"))
 
 
 def load_skill(skill_name: str, fmt: str) -> str:
@@ -113,7 +131,16 @@ def call_api(base_url: str, api_key: str, model: str,
 # Scoring
 # ---------------------------------------------------------------------------
 
-def score_route(response: str, scenario: dict) -> dict:
+def is_api_error(response: str) -> bool:
+    return response.startswith("API_ERROR")
+
+
+def keyword_in_text(text: str, keyword: str) -> bool:
+    pattern = rf"(?<!\w){re.escape(keyword.lower())}(?!\w)"
+    return re.search(pattern, text.lower()) is not None
+
+
+def score_route(response: str, scenario: dict, fmt: str = "new") -> dict:
     text = response.lower()
     should_trigger = scenario.get("should_trigger", True)
 
@@ -124,7 +151,12 @@ def score_route(response: str, scenario: dict) -> dict:
         expected = scenario.get("expected_keywords", [])
         invocation_correct = any(kw.lower() in text for kw in expected)
     else:
-        unexpected = scenario.get("unexpected_keywords", ALL_SKILL_SLASHES)
+        unexpected = scenario.get("unexpected_keywords")
+        if unexpected is None:
+            unexpected = ROUTE_SKILL_SLASHES.get(fmt, ALL_SKILL_SLASHES)
+        if fmt == "old":
+            new_only = set(ROUTE_SKILL_SLASHES["new"]) - set(ROUTE_SKILL_SLASHES["old"])
+            unexpected = [kw for kw in unexpected if kw not in new_only]
         false_positive = any(kw.lower() in text for kw in unexpected)
 
     return {
@@ -141,7 +173,7 @@ def score_execute(response: str, scenario: dict) -> dict:
 
     if not should_trigger:
         unexpected = scenario.get("unexpected_keywords", [])
-        triggered = any(kw.lower() in text for kw in unexpected)
+        triggered = any(keyword_in_text(text, kw) for kw in unexpected)
         return {
             "invocation_correct": None,
             "false_positive": triggered,
@@ -176,9 +208,9 @@ def score_execute(response: str, scenario: dict) -> dict:
     }
 
 
-def score_scenario(response: str, scenario: dict) -> dict:
+def score_scenario(response: str, scenario: dict, fmt: str = "new") -> dict:
     if scenario["mode"] == "route":
-        return score_route(response, scenario)
+        return score_route(response, scenario, fmt)
     return score_execute(response, scenario)
 
 
@@ -224,7 +256,10 @@ def run_bench(args) -> int:
         print("error: --model or BENCH_MODEL is required")
         return 2
 
-    scenarios = load_scenarios(Path(args.scenarios))
+    scenarios = [
+        sc for sc in load_scenarios(Path(args.scenarios))
+        if scenario_applies_to_format(sc, args.format)
+    ]
     print(f"Benchmark: model={model}  format={args.format}  scenarios={len(scenarios)}\n")
 
     results = []
@@ -236,7 +271,10 @@ def run_bench(args) -> int:
 
         system, user, max_tokens = build_prompt(sc, skill_content)
         response = call_api(base_url, api_key, model, system, user, max_tokens)
-        scores = score_scenario(response, sc)
+        if is_api_error(response):
+            print(f"  {sc['id']}: SKIP ({response[:120]})")
+            continue
+        scores = score_scenario(response, sc, args.format)
         results.append({**sc, "response": response[:500], "scores": scores})
 
         if sc["mode"] == "route":
@@ -357,6 +395,37 @@ def compare(path1: str, path2: str) -> int:
 def self_test() -> int:
     """Validate scoring functions on known inputs."""
 
+    assert is_api_error("API_ERROR (408): timeout") is True
+    assert is_api_error("no error") is False
+    assert keyword_in_text("Untestable edge", "test") is False
+    assert keyword_in_text("Write a test first", "test") is True
+
+    # Format gates keep new-only skills out of the old baseline.
+    assert scenario_applies_to_format({"formats": ["new"]}, "old") is False
+    assert scenario_applies_to_format({"formats": ["new"]}, "new") is True
+    assert skill_path("decision-drift-guard") is not None
+
+    # Old format does not know the decision guard; new format does.
+    decision_negative = {
+        "mode": "route",
+        "should_trigger": False,
+        "unexpected_keywords": ["/decision-drift-guard"],
+    }
+    assert score_route("/decision-drift-guard", decision_negative, "old")["false_positive"] is False
+    assert score_route("/decision-drift-guard", decision_negative, "new")["false_positive"] is True
+
+    decision = next(
+        sc for sc in load_scenarios(SCENARIOS_DEFAULT) if sc["id"] == "exec-06"
+    )
+    r = score_execute(
+        "Loaded the ledger. Classified this as a supersession. Old decision: SQLite. "
+        "New instruction: PostgreSQL. Impact: database migration. "
+        "Choose replace, branch, or refine. Plan paused before acting.",
+        decision,
+    )
+    assert r["step_adherence"] == 1.0
+    assert r["checklist_coverage"] == 1.0
+
     # Route positive: correct invocation
     r = score_route("You should use /grilling for this", {
         "mode": "route", "should_trigger": True, "expected_keywords": ["grilling"],
@@ -440,7 +509,7 @@ def self_test() -> int:
     })
     assert r["false_positive"] is True
 
-    print("Self-test passed (7 assertions)")
+    print("Self-test passed")
     return 0
 
 
@@ -463,7 +532,10 @@ def main() -> int:
         return self_test()
 
     if args.list:
-        scenarios = load_scenarios(Path(args.scenarios))
+        scenarios = [
+            sc for sc in load_scenarios(Path(args.scenarios))
+            if scenario_applies_to_format(sc, args.format)
+        ]
         for sc in scenarios:
             trigger = sc.get("should_trigger", True)
             mode = sc["mode"]

@@ -11,36 +11,29 @@ This is the map. A **flow** is a path through skills. User-invoked skills orches
 
 This repo owns the Atlas skills. Other skills may be installed — reference by name, do not copy.
 
-## Main flow: request to verified change
-
-1. IF scope or acceptance criteria are soft: use `/grilling` — one question round, then wait. Do not act until the contract is confirmed.
-2. IF the user changed an earlier accepted decision: use `/decision-drift-guard` before acting.
-3. IF one pass is unlikely to finish the goal: use `/goal-loop`.
-4. Use `/implement` to build scoped work. It uses `/tdd` at seams, runs checks, closes with `/code-review`.
-5. IF the branch needs a PR body: use `/pr-writing`.
-6. IF the remote is Bitbucket: use `/bitbucket-helper`.
-
-Route only. Do not implement, edit, or create a PR from this skill.
-
 ## Routing table
 
-| IF the user... | THEN route to... |
-|---|---|
-| Has a vague goal or competing approaches | `/grilling` |
-| Has a concrete goal needing repeated progress | `/goal-loop` |
-| Needs to build or fix code | `/implement` |
-| Needs a diff review | `/code-review` |
-| Needs a PR description | `/pr-writing` |
-| Needs a Bitbucket PR | `/bitbucket-helper` |
-| Needs isolation before risky work | `/creating-worktrees` |
-| Has broad independent work | `/parallel-agents` |
-| Needs design pressure on boundaries | `/codebase-design` |
-| Is writing Go code | `/go` |
-| Needs commit hygiene | `/git` |
-| Changed an earlier decision midstream | `/decision-drift-guard` |
-| Needs personal memory search/save | `/personal-knowledge` |
+Use the first matching row. Specific skill rows beat the generic direct-answer row.
 
-IF the request is already a confirmed implementation contract: skip grilling, route directly to `/implement`. IF the user asks only for advice: return the smallest useful route and stop.
+| IF the request... | THEN... |
+|---|---|
+| Changes an accepted decision (`actually`, `instead`, `forget that`) | Route to `/decision-drift-guard` |
+| Gives a concrete feature, fix, or implementation spec | Route to `/implement` |
+| Needs repeated progress across rounds | Route to `/goal-loop` |
+| Needs a diff review | Route to `/code-review` |
+| Needs a PR description | Route to `/pr-writing` |
+| Needs a Bitbucket PR | Route to `/bitbucket-helper` |
+| Needs isolation before risky work | Route to `/creating-worktrees` |
+| Has broad independent work | Route to `/parallel-agents` |
+| Asks whether to split, merge, or reshape services or modules | Route to `/codebase-design` |
+| Needs design pressure on boundaries | Route to `/codebase-design` |
+| Is writing Go code or asks about Go code | Route to `/go` |
+| Needs commit hygiene | Route to `/git` |
+| Asks what existing code does, asks a casual question, or requests a one-line rename/typo | Return `no skill needed` and stop |
+| Has a vague goal or competing approaches | Route to `/grilling` |
+| Needs personal memory search/save | Route to `/personal-knowledge` |
+
+Route only. Do not implement, edit, or create a PR from this skill.
 
 ## Reusable disciplines
 

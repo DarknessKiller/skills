@@ -22,8 +22,18 @@ Create isolated work under the repo root, not a global scratch folder.
 3. Sanitize the slug: replace `/`, spaces, and unusual characters with `-`.
 4. Add `.worktrees/` to `$(git rev-parse --git-path info/exclude)` if missing.
 5. Create the worktree — existing branch: `git worktree add <path> <branch>`; new branch: `git worktree add -b <branch> <path>`.
-6. Run `codegraph init <path>` only when the source repo has `.codegraph/` or the user explicitly asks.
+6. Run `codegraph init <path>` only when the source repo has `.codegraph/` or the user explicitly asks. Otherwise state `CodeGraph: not applicable`.
 7. Report path, branch, local exclude change, and CodeGraph result.
+
+## Required final block
+
+End every response with these labels:
+
+- `Report`: path and branch.
+- `Sanitized slug`: the final slug.
+- `Worktree exists`: yes or no.
+- `Exclusion`: local `.worktrees/` status.
+- `CodeGraph`: ran, not applicable, or blocked.
 
 Completion: the worktree exists at the repository-local path, the branch is correct, local exclusion is recorded, and CodeGraph status is reported when applicable.
 

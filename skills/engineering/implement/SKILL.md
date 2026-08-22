@@ -21,6 +21,18 @@ Implement the work the user points at: a spec, an issue, or the current conversa
 
 5. **Close out.** Summarize changed files and checks. Commit only when the user asked; use `/git` rules. IF a PR is needed: use `/bitbucket-helper`.
 
+## Blocked response
+
+If context is missing, state the plan before asking a question:
+
+- `Source of truth` and `done criteria`.
+- `Seam` and `Callers`.
+- `Passing check` or the planned TDD check.
+- `Review` command or gate.
+- `Changed files` and close-out status.
+
+Do not claim implementation is complete. Ask one focused question after the plan.
+
 Completion: changed files, checks, remaining risks, and blocked follow-up are named.
 
 ## Stop conditions

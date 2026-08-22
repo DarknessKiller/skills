@@ -12,7 +12,7 @@ npx skills update decision-drift-guard
 
 ## What it does
 
-Keeps accepted requirements in a plain-Markdown ledger at `.agents/decision-ledger/sessions/<session-id>.md`, scoped to the current worktree and session. When a new message may replace or contradict an earlier decision, it pauses for an explicit replace/branch/refine choice, then runs a targeted review before consequential work.
+Keeps accepted requirements in a plain-Markdown ledger at `.agents/decision-ledger/sessions/<session-id>.md`, scoped to the current worktree and session. When a new message may replace or contradict an earlier decision, it pauses for an explicit replace/branch/refine choice. It does not supersede the old decision until the user chooses, then runs a targeted review before consequential work.
 
 Storage is generic filesystem state — no Pi, Claude, or Codex session APIs. If writes fail, the ledger stays in context and the agent says persistence is unavailable.
 

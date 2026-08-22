@@ -22,4 +22,16 @@ Review the diff between `HEAD` and a fixed point. Keep two axes separate:
 
 5. **Report.** Use `## Standards` and `## Spec` headings. Include file/line references and fixes. End with counts per axis and the worst issue within each axis.
 
+## Report format
+
+Use `## Standards` and `## Spec` headings. Include:
+
+- `Comparison point`: the fixed ref.
+- `Files`: changed files or unavailable.
+- `file:line` evidence and fixes.
+- `counts` per axis.
+- `worst` issue per axis.
+
+If access is blocked, mark each field unavailable instead of omitting it.
+
 Completion: report has `## Standards`, `## Spec`, file/line evidence, fixes, counts, and worst issue per axis.

@@ -7,6 +7,10 @@ description: "Catch midstream decision changes before plans drift. Use when a ne
 
 A supersession is a new accepted user decision replacing an earlier one. Users often make this implicitly. Make it explicit before consequential work.
 
+## First pass
+
+When a request changes an accepted decision, load, classify, show the conflict, ask `replace`, `branch`, or `refine`, then stop. Do not supersede the old decision before the user chooses.
+
 Run this guard before planning, editing files, or calling consequential tools. Skip it for wording, formatting, or implementation details that preserve accepted behavior.
 
 ## Steps
@@ -52,4 +56,12 @@ Completion: one active record per replaced scope, every downstream action uses i
 
 ## Response style
 
-"I detected a conflict with D-<n>. Plan paused. Choose: replace, branch, or refine."
+First pass:
+
+- Ledger: loaded or unavailable at `.agents/decision-ledger/sessions/<session-id>.md`.
+- Classification: supersession or conflict.
+- Old decision: `<old>`.
+- New instruction: `<new>`.
+- Impact: `<what changes>`.
+- Plan paused.
+- Choose: `replace`, `branch`, or `refine`.

@@ -7,12 +7,26 @@ description: "Red-green-refactor loop. Use when implementing new behaviour, fixi
 
 Use the shortest feedback loop that proves behaviour.
 
+## Required sequence
+
+For new behaviour, start with a failing check. Do not write the implementation first. Name each phase: Red, Green, Refactor.
+
 ## Loop
 
 1. **Red** — write one failing check for the next behaviour slice.
 2. **Green** — make the smallest implementation pass.
 3. **Refactor** — simplify while the check stays green.
 4. Repeat until the contract is covered.
+
+## Output format
+
+Name every phase: `Red`, `Green`, `Refactor`, `Repeat`.
+
+Finish with:
+
+- `Passing check`: the check that passes.
+- `Normal command`: the command that ran it.
+- `Untestable`: none, or the remaining edge.
 
 Completion: every requested behavior has a passing check, the check ran in the repo's normal command, and any untestable edge is reported.
 
