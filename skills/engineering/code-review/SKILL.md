@@ -1,37 +1,25 @@
 ---
 name: code-review
-description: "Review a diff on two axes: Standards and Spec. Use when the user wants a diff, branch, or PR reviewed."
+description: "Review a diff on Standards and Spec axes. Use for diff, branch, or PR review."
 ---
 
 # Code Review
 
-Review the diff between `HEAD` and a fixed point. Keep two axes separate:
+Review diff between `HEAD` and a fixed point. Two axes:
 
-- **Standards** — does the diff follow repo rules and avoid design smells?
-- **Spec** — does the diff implement the originating issue, PRD, or request?
+- **Standards** — repo rules, design smells.
+- **Spec** — implements originating issue, PRD, or request.
 
-## Process
+## Steps
 
-1. **Pin the fixed point.** Use the user-supplied commit/branch/tag/ref. Otherwise inspect upstream, then merge-base with likely default branch. Otherwise ask the user. Confirm `git rev-parse` works and `git diff` is non-empty.
+1. **Pin fixed point.** Use supplied ref. Otherwise upstream then merge-base with default. Confirm `git rev-parse` works, `git diff` non-empty.
 
-2. **Find the spec source.** Check issue refs in commits/branch names, then user-supplied paths, then `docs/`, `specs/`, `.scratch/`, PR descriptions. IF no spec: Spec axis reports "no spec available".
+2. **Find spec.** Check issue refs in commits/branch names, then paths, `docs/`, `specs/`, PR descriptions. IF no spec: "no spec available".
 
-3. **Find standards sources.** Read `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, `CONTRIBUTING.md`, `CODING_STANDARDS.md`, and relevant skills. Apply repo standards first. Use design smells as judgement calls: duplication, speculative generality, shotgun surgery, message chains, feature envy, primitive obsession, middle men.
+3. **Find standards.** Read `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, relevant skills. Apply repo standards first.
 
-4. **Run independent review.** For meaningful diffs: spawn Standards and Spec sub-agents in parallel, each with only its axis context. Do not let one axis rerank or suppress the other.
+4. **Run review.** For meaningful diffs: spawn Standards and Spec sub-agents in parallel. Do not let one axis rerank the other.
 
-5. **Report.** Use `## Standards` and `## Spec` headings. Include file/line references and fixes. End with counts per axis and the worst issue within each axis.
+5. **Report.** `## Standards` and `## Spec` headings. file:line evidence and fixes. Counts per axis. Worst issue per axis.
 
-## Report format
-
-Use `## Standards` and `## Spec` headings. Include:
-
-- `Comparison point`: the fixed ref.
-- `Files`: changed files or unavailable.
-- `file:line` evidence and fixes.
-- `counts` per axis.
-- `worst` issue per axis.
-
-If access is blocked, mark each field unavailable instead of omitting it.
-
-Completion: report has `## Standards`, `## Spec`, file/line evidence, fixes, counts, and worst issue per axis.
+Completion: report has both headings, file:line evidence, fixes, counts, worst issue.

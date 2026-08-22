@@ -7,36 +7,28 @@ argument-hint: "What should be implemented?"
 
 # Implement
 
-Implement the work the user points at: a spec, an issue, or the current conversation. The main agent owns decisions, edits, verification, and the final report.
+Implement work the user points at. Main agent owns decisions, edits, verification, report.
 
-## Process
+## Steps
 
-1. **Pin the contract.** Identify the source of truth: spec, issue, diff request, or conversation. List done criteria and constraints. IF the contract is too vague: ask one focused question and wait.
+1. **Pin contract.** Identify source of truth: spec, issue, conversation. List done criteria. IF too vague: ask one question, wait.
 
-2. **Find the seam.** Read the current flow before editing. Reuse existing helpers, tests, patterns, and tooling. IF the work is broad or risky: spawn read-only exploration before changing files.
+2. **Find seam.** Read current flow before editing. Reuse helpers, tests, patterns. IF broad or risky: explore before changing files.
 
-3. **Build with feedback.** Use `/tdd` where possible: red test, smallest green, refactor. Work one vertical slice at a time. Run the narrowest useful check after each slice.
+3. **Build with feedback.** Use `/tdd` where possible. One vertical slice at a time. Narrowest useful check after each.
 
-4. **Review before finish.** Run the repo's formatter, lint, typecheck, and tests that fit the change. Run `/code-review` when the change is non-trivial. Fix confirmed findings, skip speculative ones.
+4. **Review.** Run formatter, lint, typecheck, tests. `/code-review` for non-trivial changes. Fix confirmed findings only.
 
-5. **Close out.** Summarize changed files and checks. Commit only when the user asked; use `/git` rules. IF a PR is needed: use `/bitbucket-helper`.
+5. **Close out.** Summarize changed files and checks. Commit only when asked. `/git` rules. IF PR needed: `/bitbucket-helper`.
 
-## Blocked response
+## Blocked
 
-If context is missing, state the plan before asking a question:
+If context missing, state plan before asking:
 
-- `Source of truth` and `done criteria`.
-- `Seam` and `Callers`.
-- `Passing check` or the planned TDD check.
-- `Review` command or gate.
-- `Changed files` and close-out status.
+- Source of truth, done criteria.
+- Seam, callers.
+- Passing check.
+- Review command.
+- Changed files.
 
-Do not claim implementation is complete. Ask one focused question after the plan.
-
-Completion: changed files, checks, remaining risks, and blocked follow-up are named.
-
-## Stop conditions
-
-Stop when required credentials, external data, destructive actions, or missing acceptance criteria block a safe implementation.
-
-IF the plan is still soft: route to `/grilling` before editing. Keep grilling bounded to decisions that can change the implementation, then wait for confirmation.
+Completion: changed files, checks, risks, blocked follow-up named.
