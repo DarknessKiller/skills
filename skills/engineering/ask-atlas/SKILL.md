@@ -12,17 +12,19 @@ argument-hint: "What are you trying to do?"
 | Request... | Route to |
 |---|---|
 | Changes accepted decision (`actually`, `instead`, `forget that`) | `/decision-drift-guard` |
+| Makes a rename-only or typo-only edit with no behavior change | `no skill needed` |
+| Asks what existing code does or asks a casual question | `no skill needed` |
 | Concrete feature, fix, or spec | `/implement` |
+| Wants a test-first check for new behavior | `/tdd` |
 | Repeated progress across rounds | `/goal-loop` |
 | Diff review | `/code-review` |
 | PR description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |
 | Isolation before risky work | `/creating-worktrees` |
 | Broad independent work | `/parallel-agents` |
-| Split, merge, reshape services | `/codebase-design` |
+| Asks whether to split a service into separate modules or reshape boundaries | `/codebase-design` |
 | Go code | `/go` |
 | Commit hygiene | `/git` |
-| What code does, casual question, rename/typo | `no skill needed` |
 | Vague goal or competing approaches | `/grilling` |
 | Personal memory | `/personal-knowledge` |
 

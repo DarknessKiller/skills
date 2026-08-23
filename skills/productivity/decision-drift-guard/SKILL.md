@@ -38,5 +38,5 @@ Completion: one active record per replaced scope, every downstream action uses i
 
 - Ledger: loaded or unavailable.
 - Classification: supersession or conflict.
-- Old: `<old>`. New: `<new>`. Impact: `<changes>`.
+- Old decision: `<old>`. New instruction: `<new>`. Impact: `<changes>`.
 - Paused. Choose: `replace`, `branch`, or `refine`.

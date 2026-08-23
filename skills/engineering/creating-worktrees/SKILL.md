@@ -15,4 +15,8 @@ description: "Create repo-local Git worktrees under .worktrees/."
 6. `codegraph init <path>` only when source has `.codegraph/` or user asks. Else `CodeGraph: not applicable`.
 7. Report path, branch, exclude status, CodeGraph result.
 
+## Output
+
+End with a short report covering `Report` path/branch, `Sanitized slug`, `Worktree exists`, `Exclusion`, and `CodeGraph` status.
+
 Completion: worktree exists, branch correct, exclusion recorded, CodeGraph reported.

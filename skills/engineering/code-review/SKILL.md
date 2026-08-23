@@ -17,4 +17,8 @@ description: "Review a diff on Standards and Spec axes."
 
 5. **Report.** `## Standards` and `## Spec` headings. file:line evidence and fixes. Counts per axis. Worst issue per axis.
 
+## Output
+
+If access is blocked, say so under these headings: `Comparison point`, `Files`, `Counts`, and `Worst issue`.
+
 Completion: report has both headings, file:line evidence, fixes, counts, worst issue.

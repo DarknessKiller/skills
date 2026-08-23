@@ -23,4 +23,8 @@ argument-hint: "What should be implemented?"
 
 If context missing, state plan before asking: source of truth, done criteria, seam, callers, passing check, review command, changed files.
 
+## Output
+
+If blocked, state the `Source of truth`, `Done criteria`, `Seam`, `Callers`, `Build with feedback` (`/tdd`, check/test), `Review`, and `Changed files` before asking a question.
+
 Completion: changed files, checks, risks, blocked follow-up named.

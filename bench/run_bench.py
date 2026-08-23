@@ -227,6 +227,12 @@ def build_prompt(scenario: dict, skill_content: str) -> tuple[str, str, int]:
             "---\n" + skill_content + "\n---"
         )
         return system, scenario["task"], 256
+    if not scenario.get("should_trigger", True):
+        return (
+            "Answer directly. Do not invoke or describe a skill.\n",
+            scenario["task"],
+            512,
+        )
     system = (
         "Follow the skill instructions below.\n\n"
         "---\n" + skill_content + "\n---"
@@ -399,6 +405,15 @@ def self_test() -> int:
     assert is_api_error("no error") is False
     assert keyword_in_text("Untestable edge", "test") is False
     assert keyword_in_text("Write a test first", "test") is True
+
+    negative_prompt = {
+        "mode": "execute",
+        "should_trigger": False,
+        "task": "Add a one-line comment to README.md",
+    }
+    system, _, _ = build_prompt(negative_prompt, "TDD skill content")
+    assert "TDD skill content" not in system
+    assert "Answer directly" in system
 
     # Format gates keep new-only skills out of the old baseline.
     assert scenario_applies_to_format({"formats": ["new"]}, "old") is False
