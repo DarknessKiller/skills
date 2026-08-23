@@ -12,4 +12,8 @@ description: "Git workflow: small diffs, Conventional Commits, no-gpg-sign."
 5. Use `git commit --no-gpg-sign`.
 6. Preserve user work. Do not overwrite it to make history pretty.
 
+## Output
+
+When status is pending, still state the `Focused diff`, `Specific subject`, how you `Preserve user work`, and `Overwritten: no`.
+
 Completion: status was inspected, the diff is focused, the subject is conventional and specific, and no user work was overwritten.

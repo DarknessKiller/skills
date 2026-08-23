@@ -22,7 +22,7 @@ You invoke this by typing `/ask-atlas` — the agent won't reach for it on its o
 
 ## The map
 
-The leading word is **flow**. `ask-atlas` separates user-invoked orchestration from model-invoked discipline, then points you at the smallest flow that fits: grilling, implementation, review, PR, worktree, parallel agents, personal memory, or codebase design.
+The leading word is **flow**. `ask-atlas` separates user-invoked orchestration from model-invoked discipline, then points you at the smallest flow that fits: grilling, implementation, TDD, review, PR, worktree, parallel agents, personal memory, or codebase design.
 
 ## It's working if
 
