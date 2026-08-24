@@ -37,7 +37,7 @@ with tempfile.TemporaryDirectory() as directory:
     (frontend_repo / "package.json").write_text(json.dumps({"dependencies": {"next": "1.0.0"}}))
     assert pr_writer.detect_framework(str(frontend_repo)) == "Next.js"
     assert pr_writer.detect_profile(str(frontend_repo)) == "frontend"
-    assert pr_writer.profile_guidance("frontend", str(frontend_repo))[0] == "<!-- Framework: Detected Next.js; verify the framework-specific behavior and conventions. -->"
+    assert pr_writer.profile_guidance("frontend", str(frontend_repo))[0] == "- Framework: Detected Next.js. Verify framework-specific behavior and conventions."
 
     flutter_repo = frontend_repo / "flutter"
     flutter_repo.mkdir()
@@ -51,7 +51,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert pr_writer.detect_framework(str(dart_repo)) == "Dart"
     assert pr_writer.detect_profile(str(dart_repo)) == "dart"
     assert pr_writer.profile_guidance("dart", str(dart_repo)) == [
-        "<!-- Framework: Detected Dart; verify dart format, dart analyze, and dart test results. -->",
+        "- Dart: Run `dart format`, `dart analyze`, and `dart test`.",
     ]
 
     go_repo = frontend_repo / "go"
@@ -60,7 +60,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert pr_writer.detect_framework(str(go_repo)) == "Go"
     assert pr_writer.detect_profile(str(go_repo)) == "go"
     assert pr_writer.profile_guidance("go", str(go_repo)) == [
-        "<!-- Language: Detected Go; verify gofmt, go vet, and go test ./... results. -->",
+        "- Go: Run `gofmt`, `go vet`, and `go test ./...`.",
     ]
     assert pr_writer.supports_screenshot("frontend")
     assert not pr_writer.supports_screenshot("generic")
@@ -72,6 +72,20 @@ with tempfile.TemporaryDirectory() as directory:
     (generic_repo / "package.json").write_text(json.dumps({"dependencies": {"express": "1.0.0"}}))
     assert pr_writer.detect_framework(str(generic_repo)) is None
     assert pr_writer.detect_profile(str(generic_repo)) == "generic"
+
+    pr_writer.commits = lambda *_: ["abcd123 feat: test template"]
+    pr_writer.changed_files = lambda *_: ["src/app.py"]
+    generic_body = pr_writer.draft_body(str(generic_repo), "origin", "feature", "main", "generic")
+    assert "<!--" not in generic_body
+    assert "## Description\n- Summarize what changed, why, scope, and non-goals." in generic_body
+    assert "## Test Plan\n- Give reviewers executable manual or automated test steps." in generic_body
+    assert "## Test Result\n- Record tests, analysis, formatting, and visual validation results.\n- Tests: Not run yet." in generic_body
+    assert "## Links\n- Figma, Confluence, Documentation, or related tickets.\n- Not applicable." in generic_body
+
+    frontend_body = pr_writer.draft_body(str(frontend_repo), "origin", "feature", "main", "frontend")
+    assert "<!--" not in frontend_body
+    assert "- Framework: Detected Next.js. Verify framework-specific behavior and conventions." in frontend_body
+    assert "## Screenshot\n- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant.\n- Not applicable." in frontend_body
 assert bitbucket.summarize_diff({"_raw_diff": "abcdefghij"}, 7, limit=5)["diff"]["truncated"]
 assert bitbucket.summarize_file({"lines": [{"text": "hello"}]}, "a.txt")["file"]["preview"] == "hello"
 

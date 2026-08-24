@@ -28,6 +28,7 @@ draft --repo-dir . [--target main] [--format toon] [--profile frontend]
 | Signal | Profile |
 |---|---|
 | React, Next, Vue, Nuxt, Svelte, Angular, Astro, Preact, React Native | `frontend` |
-| `pubspec.yaml` | `flutter` |
+| Flutter `pubspec.yaml` | `frontend` |
+| Dart `pubspec.yaml` | `dart` |
 | `go.mod` | `go` |
 | None | `generic` |

@@ -185,22 +185,18 @@ def detect_profile(repo_dir: str) -> str:
 def profile_guidance(profile: str, repo_dir: str) -> list[str]:
     framework = detect_framework(repo_dir)
     if profile == "dart":
-        return [
-            "<!-- Framework: Detected Dart; verify dart format, dart analyze, and dart test results. -->",
-        ]
+        return ["- Dart: Run `dart format`, `dart analyze`, and `dart test`."]
     if profile == "go":
-        return [
-            "<!-- Language: Detected Go; verify gofmt, go vet, and go test ./... results. -->",
-        ]
+        return ["- Go: Run `gofmt`, `go vet`, and `go test ./...`."]
     if profile == "frontend":
         guidance = [
-            "<!-- Framework validation: Run the project's build, lint, typecheck, and relevant component or end-to-end tests. -->",
-            "<!-- Visual validation: Record responsive, accessibility, and visual checks, or explain why they are not applicable. -->",
+            "- Framework checks: Run the project's build, lint, typecheck, and relevant component or end-to-end tests.",
+            "- Visual checks: Record responsive, accessibility, and visual checks, or explain why not applicable.",
         ]
         if framework:
-            guidance.insert(0, f"<!-- Framework: Detected {framework}; verify the framework-specific behavior and conventions. -->")
+            guidance.insert(0, f"- Framework: Detected {framework}. Verify framework-specific behavior and conventions.")
         return guidance
-    return ["<!-- Automated checks: List the relevant tests, lint, typecheck, formatting, or analysis commands. -->"]
+    return ["- Automated checks: List relevant tests, lint, typecheck, formatting, or analysis commands."]
 
 
 def supports_screenshot(profile: str) -> bool:
@@ -214,7 +210,7 @@ def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: st
     profile = profile or detect_profile(repo_dir)
     changes = commit_lines[:12] or ["Describe the implementation changes."]
 
-    lines = ["## Description", "<!-- Summarize what changed, why, scope, and non-goals. -->", "", "- Key changes:"]
+    lines = ["## Description", "- Summarize what changed, why, scope, and non-goals.", "", "- Key changes:"]
     lines.extend(f"- {line}" for line in changes)
     if files:
         lines.extend(["", "- Files touched:"])
@@ -224,28 +220,28 @@ def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: st
     lines.extend([
         "",
         "## Test Plan",
-        "<!-- Give reviewers executable manual or automated test steps. -->",
+        "- Give reviewers executable manual or automated test steps.",
         *profile_guidance(profile, repo_dir),
         "",
         "## Test Result",
-        "<!-- Record tests, analysis, formatting, and visual validation results. -->",
+        "- Record tests, analysis, formatting, and visual validation results.",
         "- Tests: Not run yet.",
         "",
         "## Code Risk",
-        "<!-- Describe runtime risk, mitigation, and rollback. -->",
+        "- Describe runtime risk, mitigation, and rollback.",
         "- Risk: Describe the main runtime or review risk.",
         "- Mitigation: Describe safeguards or monitoring.",
         "- Rollback: Revert this PR.",
         "",
         "## Links",
-        "<!-- Figma, Confluence, Documentation, or related tickets. -->",
+        "- Figma, Confluence, Documentation, or related tickets.",
     ])
     lines.extend(f"- {key}" for key in keys) if keys else lines.append("- Not applicable.")
     if supports_screenshot(profile):
         lines.extend([
             "",
             "## Screenshot",
-            "<!-- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant. -->",
+            "- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant.",
             "- Not applicable.",
         ])
     return "\n".join(lines) + "\n"
