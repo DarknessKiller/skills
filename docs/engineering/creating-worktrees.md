@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=creating-worktrees
+npx skills add https://github.com/darknesskiller/skills -s creating-worktrees
 ```
 
 ```bash

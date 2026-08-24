@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=decision-drift-guard
+npx skills add https://github.com/darknesskiller/skills -s decision-drift-guard
 ```
 
 ```bash

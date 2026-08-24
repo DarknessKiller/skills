@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=pr-writing
+npx skills add https://github.com/darknesskiller/skills -s pr-writing
 ```
 
 ```bash

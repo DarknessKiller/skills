@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=implement
+npx skills add https://github.com/darknesskiller/skills -s implement
 ```
 
 ```bash

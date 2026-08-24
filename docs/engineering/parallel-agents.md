@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=parallel-agents
+npx skills add https://github.com/darknesskiller/skills -s parallel-agents
 ```
 
 ```bash

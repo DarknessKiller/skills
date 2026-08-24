@@ -8,7 +8,7 @@ Use this frame:
 Quickstart:
 
 \`\`\`bash
-npx skills add https://github.com/darknesskiller/skills --skill=<name>
+npx skills add https://github.com/darknesskiller/skills -s <name>
 \`\`\`
 
 \`\`\`bash

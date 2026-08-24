@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=goal-loop
+npx skills add https://github.com/darknesskiller/skills -s goal-loop
 ```
 
 ```bash

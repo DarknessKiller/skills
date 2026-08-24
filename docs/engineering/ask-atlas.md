@@ -1,7 +1,7 @@
 Quickstart:
 
 ```bash
-npx skills add https://github.com/darknesskiller/skills --skill=ask-atlas
+npx skills add https://github.com/darknesskiller/skills -s ask-atlas
 ```
 
 ```bash
