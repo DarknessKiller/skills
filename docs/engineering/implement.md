@@ -18,7 +18,7 @@ The defining constraint is feedback: pin the contract, build one slice at a time
 
 ## When to reach for it
 
-You invoke this by typing `/implement` — the agent won't reach for it on its own. Reach for it when you want a concrete change built, not just investigated or planned.
+The agent can reach for this on its own when the request is a concrete change to build, or you can type `/implement` directly. Reach for it when you want the work done, not just investigated or planned.
 
 ## Feedback first
 
