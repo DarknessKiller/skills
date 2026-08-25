@@ -7,8 +7,10 @@ description: "Bitbucket PR operations: create, read, update, approve, diff."
 
 Auto-detects from git remote: `bitbucket.org` → Cloud, else → Server.
 
+The helper script lives at `scripts/bitbucket_server_pr.py` relative to this skill's directory (the harness resolves it). Run it from the user's repo with the script's absolute or skill-relative path:
+
 ```bash
-python3 skills/engineering/bitbucket-helper/scripts/bitbucket_server_pr.py
+python3 <skill-dir>/scripts/bitbucket_server_pr.py
 ```
 
 ## Steps

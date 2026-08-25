@@ -5,8 +5,10 @@ description: "Draft PR descriptions from local git history."
 
 # PR Writing
 
+The helper script lives at `scripts/pr_writer.py` relative to this skill's directory (the harness resolves it). Run it from the user's repo with the script's absolute or skill-relative path:
+
 ```bash
-python3 skills/engineering/pr-writing/scripts/pr_writer.py
+python3 <skill-dir>/scripts/pr_writer.py
 ```
 
 ## Steps
