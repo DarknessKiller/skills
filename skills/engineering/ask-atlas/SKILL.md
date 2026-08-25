@@ -18,7 +18,7 @@ argument-hint: "What are you trying to do?"
 | Wants a test-first check for new behavior | `/tdd` |
 | Repeated progress across rounds | `/goal-loop` |
 | Diff review | `/code-review` |
-| PR description | `/pr-writing` |
+| Creates or updates a PR or pull request description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |
 | Isolation before risky work | `/creating-worktrees` |
 | Broad independent work | `/parallel-agents` |
@@ -28,4 +28,8 @@ argument-hint: "What are you trying to do?"
 | Vague goal or competing approaches | `/grilling` |
 | Personal memory | `/personal-knowledge` |
 
-Route only. Do not implement from this skill.
+On match, invoke the routed skill with your skill tool immediately.
+Route will not load: name the exact command for the user.
+`no skill needed`: answer directly, load nothing.
+
+Do not implement from this skill.

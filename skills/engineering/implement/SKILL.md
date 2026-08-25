@@ -1,7 +1,6 @@
 ---
 name: implement
 description: "Build scoped work from a spec, issue, or conversation."
-disable-model-invocation: true
 argument-hint: "What should be implemented?"
 ---
 
