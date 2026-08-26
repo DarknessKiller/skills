@@ -12,7 +12,7 @@ npx skills update code-review
 
 ## What it does
 
-`code-review` inspects a diff against a fixed point, discovering the upstream or likely default-branch comparison when the user does not provide one. It reports Standards and Spec separately so convention failures do not hide requirement failures, and vice versa.
+`code-review` inspects a diff against a fixed point, discovering the upstream or likely default-branch comparison when the user does not provide one. It reviews Standards, then Spec, and reports them separately so convention failures do not hide requirement failures, and vice versa.
 
 The defining constraint is separation: two review axes, no merged ranking.
 

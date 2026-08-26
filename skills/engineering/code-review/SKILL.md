@@ -13,7 +13,7 @@ description: "Review a diff on Standards and Spec axes."
 
 3. **Find standards.** Read `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, relevant skills. Apply repo standards first.
 
-4. **Run review.** For meaningful diffs: spawn Standards and Spec sub-agents in parallel. One axis must not rerank the other.
+4. **Run review.** Review Standards, then Spec. One axis must not rerank the other.
 
 5. **Report.** `## Standards` and `## Spec` headings. file:line evidence and fixes. Counts per axis. Worst issue per axis.
 

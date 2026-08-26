@@ -1,6 +1,7 @@
 ---
 name: parallel-agents
 description: "Fan out independent read and write lanes."
+disable-model-invocation: true
 ---
 
 # Parallel Agents

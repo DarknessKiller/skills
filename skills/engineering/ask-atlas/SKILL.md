@@ -21,7 +21,7 @@ argument-hint: "What are you trying to do?"
 | Creates or updates a PR or pull request description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |
 | Isolation before risky work | `/creating-worktrees` |
-| Broad independent work | `/parallel-agents` |
+| Explicitly requests parallel or multi-agent work | `/parallel-agents` |
 | Asks whether to split a service into separate modules or reshape boundaries | `/codebase-design` |
 | Go code | `/go` |
 | Commit hygiene | `/git` |
