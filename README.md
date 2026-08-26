@@ -38,17 +38,17 @@ Daily code work.
 
 - **[ask-atlas](./skills/engineering/ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
 - **[goal-loop](./skills/engineering/goal-loop/SKILL.md)** — Advance a goal in bounded verified rounds.
-- **[implement](./skills/engineering/implement/SKILL.md)** — Build scoped work with tests and review.
+- **[parallel-agents](./skills/engineering/parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
 
 **Model-invoked**
 
+- **[implement](./skills/engineering/implement/SKILL.md)** — Build scoped work with tests and review.
 - **[bitbucket-helper](./skills/engineering/bitbucket-helper/SKILL.md)** — Read PRs, files, diffs, commits, and mutate Bitbucket Server/Data Center or Cloud PRs.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Review a diff on Standards and Spec as separate axes.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Keep modules deep and boundaries clean.
 - **[creating-worktrees](./skills/engineering/creating-worktrees/SKILL.md)** — Create repo-local Git worktrees under `.worktrees/`.
 - **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
 - **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
-- **[parallel-agents](./skills/engineering/parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
 - **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes with a red-green-refactor loop.
 
