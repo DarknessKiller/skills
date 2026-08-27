@@ -7,6 +7,7 @@ Daily code work.
 - **[ask-atlas](./ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
 - **[goal-loop](./goal-loop/SKILL.md)** — Advance a goal in bounded verified rounds.
 - **[parallel-agents](./parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
+- **[tdd](./tdd/SKILL.md)** — Drive changes red-green-refactor with a real API E2E gate.
 
 ## Model-invoked
 
@@ -18,4 +19,3 @@ Daily code work.
 - **[git](./git/SKILL.md)** — Keep diffs and commits reviewable.
 - **[go](./go/SKILL.md)** — Write explicit, context-safe Go.
 - **[pr-writing](./pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
-- **[tdd](./tdd/SKILL.md)** — Drive changes red-green-refactor.

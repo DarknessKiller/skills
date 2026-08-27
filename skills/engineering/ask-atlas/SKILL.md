@@ -15,7 +15,7 @@ argument-hint: "What are you trying to do?"
 | Makes a rename-only or typo-only edit with no behavior change | `no skill needed` |
 | Asks what existing code does or asks a casual question | `no skill needed` |
 | Concrete feature, fix, or spec | `/implement` |
-| Wants a test-first check for new behavior | `/tdd` |
+| Wants a test-first check for new behavior | Name `/tdd`; the user invokes it |
 | Repeated progress across rounds | `/goal-loop` |
 | Diff review | `/code-review` |
 | Creates or updates a PR or pull request description | `/pr-writing` |
