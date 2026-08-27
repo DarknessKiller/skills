@@ -4,6 +4,7 @@ Daily code work.
 
 ## User-invoked
 
+- **[api-e2e](./api-e2e/SKILL.md)** — Run a real HTTP API E2E check.
 - **[ask-atlas](./ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
 - **[goal-loop](./goal-loop/SKILL.md)** — Advance a goal in bounded verified rounds.
 - **[parallel-agents](./parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.

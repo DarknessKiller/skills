@@ -14,6 +14,7 @@ argument-hint: "What are you trying to do?"
 | Changes accepted decision (`actually`, `instead`, `forget that`) | `/decision-drift-guard` |
 | Makes a rename-only or typo-only edit with no behavior change | `no skill needed` |
 | Asks what existing code does or asks a casual question | `no skill needed` |
+| Wants a real HTTP API E2E check | `/api-e2e` |
 | Concrete feature, fix, or spec | `/implement` |
 | Wants a test-first check for new behavior | `/tdd` |
 | Repeated progress across rounds | `/goal-loop` |

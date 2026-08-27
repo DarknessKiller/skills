@@ -1,0 +1,5 @@
+interface:
+  display_name: "API E2E"
+  short_description: "Run a real API E2E check"
+policy:
+  allow_implicit_invocation: false
