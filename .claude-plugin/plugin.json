@@ -17,6 +17,7 @@
     "pi-package"
   ],
   "skills": [
+    "./skills/engineering/api-e2e",
     "./skills/engineering/ask-atlas",
     "./skills/engineering/bitbucket-helper",
     "./skills/engineering/code-review",

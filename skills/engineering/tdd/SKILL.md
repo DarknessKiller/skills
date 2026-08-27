@@ -1,24 +1,23 @@
 ---
 name: tdd
 description: "Red-green-refactor loop with a real API E2E gate for HTTP behaviour."
-disable-model-invocation: true
 ---
 
 # TDD
 
 ## Loop
 
-1. **Red** — write one failing check for the next behaviour slice.
-2. **Red API** — for HTTP behaviour, add one live API scenario in `./e2e-scripts`.
-3. **Green** — make the smallest implementation pass.
-4. **API gate** — run the scenario against the running service over HTTP.
-5. **Refactor** — simplify while every check stays green.
+1. **Red**. Write one failing check for the next behaviour slice.
+2. **Red API**. For HTTP behaviour, point the user to `/api-e2e`.
+3. **Green**. Make the smallest implementation pass.
+4. **API gate**. Run the scenario against the running service over HTTP.
+5. **Refactor**. Simplify while every check stays green.
 6. Repeat until the contract is covered.
 
 ## API E2E
 
 Every HTTP behaviour slice needs a real request and response check.
-Use or create `./e2e-scripts/api_e2e.py`.
+For HTTP behaviour, point the user to `/api-e2e`.
 Run it against a real running service.
 Do not replace the service with a mock, stub, or in-process handler.
 
@@ -45,5 +44,4 @@ Prefer the highest-level test that proves the behaviour without brittle setup. H
 
 ## Local script
 
-If `./e2e-scripts/api_e2e.py` is missing, write it before implementing the HTTP behaviour.
-Keep project-local E2E scripts in `./e2e-scripts`.
+The user-invoked `/api-e2e` skill owns the project-local `./e2e-scripts` runner.

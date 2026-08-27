@@ -18,7 +18,7 @@ The defining constraint is the tight loop: no broad implementation before the ne
 
 ## When to reach for it
 
-Type `/tdd` when a feature, bug fix, or regression can be proved by a small automated check. TDD is user-invoked only.
+Type `/tdd`, or let the agent reach for it automatically when a feature, bug fix, or regression can be proved by a small automated check.
 
 ## Red-green-refactor
 
@@ -26,7 +26,7 @@ The leading phrase is **tight feedback loop**. The skill chooses the highest-lev
 
 ## API E2E gate
 
-For each HTTP behaviour slice, write and run a real request against the running service. The project-local stdlib runner lives at `./e2e-scripts/api_e2e.py` and checks status, body text, or exact JSON. If it is missing, write it before implementing the behaviour.
+For each HTTP behaviour slice, point the user to `/api-e2e`. That user-invoked extension owns the project-local stdlib runner at `./e2e-scripts/api_e2e.py` and checks status, body text, or exact JSON.
 
 Prerequisites: Python 3 and a running API. Pass the base URL, startup command, and required environment through the project test plan. The runner outputs `header`, `request`, and `resp` records in that order.
 

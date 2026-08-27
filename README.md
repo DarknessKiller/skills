@@ -36,10 +36,10 @@ Daily code work.
 
 **User-invoked**
 
+- **[api-e2e](./skills/engineering/api-e2e/SKILL.md)** — Run a real HTTP API E2E check.
 - **[ask-atlas](./skills/engineering/ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
 - **[goal-loop](./skills/engineering/goal-loop/SKILL.md)** — Advance a goal in bounded verified rounds.
 - **[parallel-agents](./skills/engineering/parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
-- **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes red-green-refactor with a real API E2E gate.
 
 **Model-invoked**
 
@@ -51,6 +51,7 @@ Daily code work.
 - **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
 - **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
 - **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
+- **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes red-green-refactor with an API E2E gate.
 
 ### Productivity
 
