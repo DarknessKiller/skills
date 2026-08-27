@@ -12,11 +12,11 @@ npx skills update api-e2e
 
 ## What it does
 
-`api-e2e` runs a real HTTP request against a running API. It checks status, body text, or exact JSON and prints `header`, `request`, and `resp` records.
+`api-e2e` is an opt-in extension for a TDD run. It runs a real HTTP request against a running API, checks status, body text, or exact JSON, and prints `header`, `request`, and `resp` records. Default `/tdd` behavior stays unchanged.
 
 ## When to reach for it
 
-Type `/api-e2e` for an HTTP behavior slice. It is user-invoked only.
+Type `/api-e2e` when you want to add the API gate to a TDD run. It is user-invoked only.
 
 ## Prerequisites
 

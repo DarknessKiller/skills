@@ -51,7 +51,7 @@ Daily code work.
 - **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
 - **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
 - **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
-- **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes red-green-refactor with an API E2E gate.
+- **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes with a red-green-refactor loop.
 
 ### Productivity
 
