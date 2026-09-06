@@ -1,0 +1,5 @@
+interface:
+  display_name: "Atlas mode"
+  short_description: "Plan and hand over work as the main invoker"
+policy:
+  allow_implicit_invocation: false

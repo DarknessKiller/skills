@@ -5,6 +5,7 @@ Daily code work.
 ## User-invoked
 
 - **[ask-atlas](./ask-atlas/SKILL.md)** — Ask which skill or flow fits your situation.
+- **[atlas-mode](./atlas-mode/SKILL.md)** — Plan and hand over work as the main invoker.
 - **[goal-loop](./goal-loop/SKILL.md)** — Advance a goal in bounded verified rounds.
 - **[parallel-agents](./parallel-agents/SKILL.md)** — Fan out independent read and safe write lanes.
 

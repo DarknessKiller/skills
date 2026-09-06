@@ -17,6 +17,7 @@ argument-hint: "What are you trying to do?"
 | Concrete feature, fix, or spec | `/implement` |
 | Wants a test-first check for new behavior | `/tdd` |
 | Repeated progress across rounds | `/goal-loop` |
+| Acts as the main invoker and hands a plan to subagents | `/atlas-mode` |
 | Diff review | `/code-review` |
 | Creates or updates a PR or pull request description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |

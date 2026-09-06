@@ -18,6 +18,7 @@
   ],
   "skills": [
     "./skills/engineering/ask-atlas",
+    "./skills/engineering/atlas-mode",
     "./skills/engineering/bitbucket-helper",
     "./skills/engineering/code-review",
     "./skills/engineering/codebase-design",
