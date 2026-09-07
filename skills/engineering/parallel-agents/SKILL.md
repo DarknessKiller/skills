@@ -6,6 +6,15 @@ disable-model-invocation: true
 
 # Parallel Agents
 
+User-invoked fan-out. Use when user asks for parallel or multi-agent work.
+
+Fan out with the `workflow` tool. One run owns all lanes.
+Set `model` and `effort` per lane with `agent({ model, effort })`.
+
+Small fan-outs: `Agent` tool works too. Launch each lane, integrate in main thread.
+
+Never one agent per one-line lookup.
+
 ## Steps
 
 1. **Slice lanes.** Read-only first: one agent per independent question, directory, package, axis. Launch concurrently.
