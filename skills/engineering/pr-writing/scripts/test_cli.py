@@ -80,6 +80,12 @@ with tempfile.TemporaryDirectory() as directory:
     assert "## Description\n- Summarize what changed, why, scope, and non-goals." in generic_body
     assert "## Test Plan\n- Give reviewers executable manual or automated test steps." in generic_body
     assert "## Test Result\n- Record tests, analysis, formatting, and visual validation results.\n- Tests: Not run yet." in generic_body
+    assert [line for line in generic_body.splitlines() if line.startswith("## ")] == [
+        "## Description",
+        "## Test Plan",
+        "## Test Result",
+        "## Links",
+    ]
     assert "## Links\n- Figma, Confluence, Documentation, or related tickets.\n- Not applicable." in generic_body
 
     frontend_body = pr_writer.draft_body(str(frontend_repo), "origin", "feature", "main", "frontend")

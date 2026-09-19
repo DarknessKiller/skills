@@ -14,7 +14,7 @@ python3 <skill-dir>/scripts/pr_writer.py
 ## Steps
 
 1. Run helper or inspect branch. Done when source, target, commits, changed files known.
-2. Detect profile or accept `--profile`. Draft with Description, Test Plan, Test Result, Code Risk, Links. Add Screenshot only for `frontend`.
+2. Detect profile or accept `--profile`. Draft with Description, Test Plan, Test Result, Links. Add Screenshot only for `frontend`.
 3. Every claim must be supported by local context. Unknowns labeled, not invented.
 
 Completion: body has applicable headings, profile matches repo, unknowns labeled.

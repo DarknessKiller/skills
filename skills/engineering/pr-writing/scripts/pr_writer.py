@@ -227,12 +227,6 @@ def draft_body(repo_dir: str, remote: str, source: str, target: str, profile: st
         "- Record tests, analysis, formatting, and visual validation results.",
         "- Tests: Not run yet.",
         "",
-        "## Code Risk",
-        "- Describe runtime risk, mitigation, and rollback.",
-        "- Risk: Describe the main runtime or review risk.",
-        "- Mitigation: Describe safeguards or monitoring.",
-        "- Rollback: Revert this PR.",
-        "",
         "## Links",
         "- Figma, Confluence, Documentation, or related tickets.",
     ])
