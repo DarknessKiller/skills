@@ -58,7 +58,7 @@ Check active model registry first. Set `model` and `effort` per agent.
 
 | Work | Model | Effort |
 | --- | --- | --- |
-| Prose or judgment | `gpt-5.6-sol` | `high` |
+| Prose or judgment | `gpt-5.6-sol` | `medium` |
 | Normal code or tests | `gpt-5.6-luna` | `medium` |
 | Hard cross-cutting judgment | `gpt-5.6-luna` | `max` |
 | Hard instruction-following | `gpt-5.6-terra` | `max` |
