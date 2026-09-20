@@ -50,7 +50,7 @@ Daily code work.
 - **[creating-worktrees](./skills/engineering/creating-worktrees/SKILL.md)** — Create repo-local Git worktrees under `.worktrees/`.
 - **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
 - **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
-- **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request descriptions from local git history.
+- **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request titles and descriptions from local git history.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes with a red-green-refactor loop.
 
 ### Productivity
