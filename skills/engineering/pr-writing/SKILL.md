@@ -1,6 +1,6 @@
 ---
 name: pr-writing
-description: "Draft PR descriptions from local git history."
+description: "Draft PR titles and descriptions from local git history."
 ---
 
 # PR Writing
@@ -15,9 +15,10 @@ python3 <skill-dir>/scripts/pr_writer.py
 
 1. Run helper or inspect branch. Done when source, target, commits, changed files known.
 2. Detect profile or accept `--profile`. Draft with Description, Test Plan, Test Result, Links. Add Screenshot only for `frontend`.
-3. Every claim must be supported by local context. Unknowns labeled, not invented.
+3. Compose title. `feat` adds behavior, `fix` repairs, `refactor` restructures. Ticket in branch or commits: `<feat|fix|refactor> [TICKET-123]: concise description`. No ticket: `<feat|fix|refactor> (feature-name): concise description`.
+4. Every claim must be supported by local context. Unknowns labeled, not invented.
 
-Completion: body has applicable headings, profile matches repo, unknowns labeled.
+Completion: title follows the ticket rule, body has applicable headings, profile matches repo, unknowns labeled.
 
 ## Commands
 

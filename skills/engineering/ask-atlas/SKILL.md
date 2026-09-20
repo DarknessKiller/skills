@@ -19,7 +19,7 @@ argument-hint: "What are you trying to do?"
 | Repeated progress across rounds | `/goal-loop` |
 | Acts as the main invoker and hands a plan to subagents | `/atlas-mode` |
 | Diff review | `/code-review` |
-| Creates or updates a PR or pull request description | `/pr-writing` |
+| Creates or updates a PR title or description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |
 | Isolation before risky work | `/creating-worktrees` |
 | Explicitly requests parallel or multi-agent work | `/parallel-agents` |
