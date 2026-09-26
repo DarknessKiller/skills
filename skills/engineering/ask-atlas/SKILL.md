@@ -29,8 +29,11 @@ argument-hint: "What are you trying to do?"
 | Vague goal or competing approaches | `/grilling` |
 | Personal memory | `/personal-knowledge` |
 
-On match, invoke the routed skill with your skill tool immediately.
-Route will not load: name the exact command for the user.
+On match: read `<skill-dir>/../<route name>/SKILL.md` relative to this skill's directory (the harness resolves it), then follow it.
+Read the file directly. A route with `disable-model-invocation: true` is still readable.
+Do not invoke the route through a skill tool.
+File missing: try `../../<bucket>/<route name>/SKILL.md`.
+Still missing: name the exact command for the user.
 `no skill needed`: answer directly, load nothing.
 
 Do not implement from this skill.

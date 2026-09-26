@@ -14,6 +14,8 @@ npx skills update ask-atlas
 
 `ask-atlas` is the router over this skill pack. It turns a vague goal into the next skill to run, without making you remember the whole map.
 
+A route loads by reading that skill's `SKILL.md` as a sibling of ask-atlas's skill directory: `<skill-dir>/../<skill-name>/SKILL.md`. Because the load is a plain file read, a routed skill with `disable-model-invocation: true` loads the same as any other.
+
 The defining constraint is that it only routes; it does not implement the work itself. When scope or acceptance criteria are soft, it starts bounded grilling and waits for confirmation before routing.
 
 ## When to reach for it
@@ -26,7 +28,7 @@ The leading word is **flow**. `ask-atlas` separates user-invoked orchestration f
 
 ## It's working if
 
-- A matching request invokes the routed skill immediately; the agent does not stop at naming it.
+- A matching request loads the routed `SKILL.md` immediately and follows it; the agent does not stop at naming it. Disabled model invocation does not block the load.
 - The output uses the skill's leading words consistently.
 - Specific skill routes take priority over generic routing; module-split questions use `codebase-design`, while casual questions and trivial edits return `no skill needed`.
 - The next action is smaller and clearer than the original request.
