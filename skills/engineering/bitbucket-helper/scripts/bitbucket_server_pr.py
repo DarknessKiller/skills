@@ -7,8 +7,10 @@ import argparse
 import base64
 import importlib.util
 import json
+import ssl
 import os
 import re
+import ssl
 import subprocess
 import sys
 import urllib.error
@@ -223,6 +225,13 @@ def _auth_headers(info: RepoInfo, auth: str, user: str | None) -> dict[str, str]
     return {"Authorization": f"Bearer {token}"}
 
 
+def _open_url(request: urllib.request.Request) -> Any:
+    context = ssl.create_default_context()
+    # Corporate TLS interception omits Authority Key Identifier; keep normal CA and hostname validation.
+    context.verify_flags &= ~ssl.VERIFY_X509_STRICT
+    return urllib.request.urlopen(request, timeout=60, context=context)
+
+
 def api_request(info: RepoInfo, method: str, url: str, payload: dict | None, auth: str, user: str | None) -> dict:
     headers = {"Accept": "application/json"}
     data = None
@@ -232,7 +241,7 @@ def api_request(info: RepoInfo, method: str, url: str, payload: dict | None, aut
     headers.update(_auth_headers(info, auth, user))
     request = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with _open_url(request) as response:
             return json.loads(response.read().decode())
     except urllib.error.HTTPError as exc:
         exc.read()
@@ -252,7 +261,7 @@ def api_request_text(info: RepoInfo, method: str, url: str, auth: str, user: str
     headers.update(_auth_headers(info, auth, user))
     request = urllib.request.Request(url, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:
+        with _open_url(request) as response:
             return response.read().decode()
     except urllib.error.HTTPError as exc:
         exc.read()
