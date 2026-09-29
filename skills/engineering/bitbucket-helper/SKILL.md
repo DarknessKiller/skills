@@ -47,6 +47,8 @@ Flags: `--full`, `--body`, `--format text`, `--cloud`, `--base-url`.
 
 `BB_USER` / `BB_PASSWORD` or scoped: `BB_CLOUD_*` / `BB_SERVER_*` (scoped win). Cloud: App Password with Repositories and Pull Requests Read/Write.
 
+SSH clone remotes are supported for repo detection. SSH keys authenticate Git transport only; REST API calls still need Bitbucket user/token credentials.
+
 ## Detection
 
 | Remote | Type |

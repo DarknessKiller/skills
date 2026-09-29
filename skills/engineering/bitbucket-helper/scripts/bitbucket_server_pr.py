@@ -123,26 +123,33 @@ def print_text(text: str) -> None:
 
 def infer_repo_info(url: str) -> RepoInfo:
     normalized = url.strip()
-
-    if normalized.startswith("git@"):
-        match = re.match(r"git@([^:]+):/?(.+)$", normalized)
-        if not match:
-            raise RuntimeError(f"unsupported remote URL: {url}")
-        host, path = match.group(1), match.group(2)
+    parsed = urllib.parse.urlparse(normalized)
+    ssh = normalized.startswith("git@") or parsed.scheme == "ssh"
+    if ssh:
+        if normalized.startswith("git@"):
+            match = re.match(r"git@([^:]+):/?(.+)$", normalized)
+            if not match:
+                raise RuntimeError(f"unsupported remote URL: {url}")
+            host, path = match.groups()
+        else:
+            host, path = parsed.hostname, parsed.path.lstrip("/")
+            if not host or not path:
+                raise RuntimeError(f"unsupported remote URL: {url}")
+        path = path.rstrip("/").removesuffix(".git")
+        parts = path.split("/")
         if host == "bitbucket.org":
-            parts = path.rstrip("/").removesuffix(".git").split("/", 1)
             if len(parts) != 2:
                 raise RuntimeError(f"could not parse Bitbucket Cloud remote: {url}")
             return RepoInfo(CLOUD_API, parts[0], parts[1], True)
-        normalized = f"https://{host}/{path}"
+        # Bitbucket Server SSH clone paths use PROJECT/repo.git.
+        if len(parts) == 2:
+            return RepoInfo(f"https://{host}", parts[0].upper(), parts[1], False)
+        raise RuntimeError(f"could not infer Bitbucket project/repo from {url}")
 
-    parsed = urllib.parse.urlparse(normalized)
     if not parsed.scheme or not parsed.netloc:
         raise RuntimeError(f"unsupported remote URL: {url}")
-
     if parsed.netloc == "bitbucket.org":
-        path = parsed.path.rstrip("/").removesuffix(".git").strip("/")
-        parts = path.split("/", 1)
+        parts = parsed.path.rstrip("/").removesuffix(".git").strip("/").split("/", 1)
         if len(parts) != 2:
             raise RuntimeError(f"could not parse Bitbucket Cloud remote: {url}")
         return RepoInfo(CLOUD_API, parts[0], parts[1], True)
@@ -154,7 +161,6 @@ def infer_repo_info(url: str) -> RepoInfo:
     if not match:
         raise RuntimeError(f"could not infer Bitbucket project/repo from {url}")
     return RepoInfo(f"{parsed.scheme}://{parsed.netloc}", match.group(1).upper(), match.group(2), False)
-
 
 def repo_info_from_args(args: argparse.Namespace) -> RepoInfo:
     if args.base_url:

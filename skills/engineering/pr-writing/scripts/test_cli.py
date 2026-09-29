@@ -92,6 +92,9 @@ with tempfile.TemporaryDirectory() as directory:
     assert "<!--" not in frontend_body
     assert "- Framework: Detected Next.js. Verify framework-specific behavior and conventions." in frontend_body
     assert "## Screenshot\n- Add screenshots or Figma Design Validation output for UI changes; skip if irrelevant.\n- Not applicable." in frontend_body
+assert bitbucket.infer_repo_info("git@bitbucket.org:workspace/repo.git") == bitbucket.RepoInfo(bitbucket.CLOUD_API, "workspace", "repo", True)
+assert bitbucket.infer_repo_info("git@bitbucket.example.com:proj/repo.git") == bitbucket.RepoInfo("https://bitbucket.example.com", "PROJ", "repo", False)
+assert bitbucket.infer_repo_info("ssh://git@bitbucket.example.com:7999/PROJ/repo.git") == bitbucket.RepoInfo("https://bitbucket.example.com", "PROJ", "repo", False)
 assert bitbucket.summarize_diff({"_raw_diff": "abcdefghij"}, 7, limit=5)["diff"]["truncated"]
 assert bitbucket.summarize_file({"lines": [{"text": "hello"}]}, "a.txt")["file"]["preview"] == "hello"
 
