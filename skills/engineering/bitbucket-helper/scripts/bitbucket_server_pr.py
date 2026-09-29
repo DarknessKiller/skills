@@ -352,6 +352,17 @@ def create_pr(args: argparse.Namespace) -> dict:
     return {"dryRun": True, "url": url, "payload": payload} if args.dry_run else api_request(info, "POST", url, payload, args.auth, args.user)
 
 
+def list_prs(args: argparse.Namespace) -> dict:
+    info = repo_info_from_args(args)
+    params = {"pagelen" if info.cloud else "limit": args.limit}
+    if args.state != "ALL" or not info.cloud:
+        params["state"] = args.state
+    if not info.cloud:
+        params["start"] = args.page_start
+    return api_request(info, "GET", pull_request_url(info, params=params), None, args.auth, args.user)
+
+
+
 def get_pr(args: argparse.Namespace) -> dict:
     info = repo_info_from_args(args)
     return api_request(info, "GET", pull_request_url(info, args.pr_id), None, args.auth, args.user)
@@ -455,6 +466,18 @@ def repo_commit(args: argparse.Namespace) -> dict:
 
 
 # ── Summarize ────────────────────────────────────────────────────────────────
+
+def summarize_pr_list(result: dict, full: bool = False) -> dict[str, Any]:
+    if full:
+        return {"api_result": result}
+    values = result.get("values", [])
+    return {
+        "pull_requests": [summarize_pr(pr, "list")["pull_request"] for pr in values],
+        "count": result.get("size", len(values)),
+        "is_last_page": result.get("isLastPage", not result.get("next")),
+    }
+
+
 
 def summarize_pr(result: dict, action: str, full: bool = False) -> dict[str, Any]:
     if full:
@@ -626,6 +649,7 @@ def home(repo_dir: str = ".", remote: str = "origin") -> dict[str, Any]:
         {"name": "get", "usage": "python3 bitbucket_server_pr.py get <pr_id> --repo-dir ."},
         {"name": "create", "usage": "python3 bitbucket_server_pr.py create --repo-dir . --target main --title \"...\""},
         {"name": "update", "usage": "python3 bitbucket_server_pr.py update <pr_id> --repo-dir . --refresh-description"},
+        {"name": "list", "usage": "python3 bitbucket_server_pr.py list --repo-dir . [--state OPEN] [--limit 25]"},
         {"name": "approve", "usage": "python3 bitbucket_server_pr.py approve <pr_id> --repo-dir ."},
         {"name": "review-context", "usage": "python3 bitbucket_server_pr.py review-context <pr_id> --repo-dir ."},
         {"name": "files", "usage": "python3 bitbucket_server_pr.py files <pr_id> --repo-dir ."},
@@ -669,6 +693,12 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument("--description-file")
     create.add_argument("--reviewers", nargs="*", default=[])
     create.add_argument("--draft", action="store_true", help="create as a draft pull request")
+
+    list_cmd = sub.add_parser("list", help="List repository pull requests")
+    add_api(list_cmd)
+    list_cmd.add_argument("--state", choices=("OPEN", "MERGED", "DECLINED", "SUPERSEDED", "ALL"), default="OPEN")
+    list_cmd.add_argument("--limit", type=int, default=25)
+    list_cmd.add_argument("--page-start", type=int, default=0, help="Bitbucket Server pagination offset")
 
     get = sub.add_parser("get", help="Show pull request metadata")
     add_api(get)
@@ -749,7 +779,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     args = build_parser().parse_args(argv)
     try:
-        if args.cmd == "create":
+        if args.cmd == "list":
+            print_toon(summarize_pr_list(list_prs(args), args.full))
+        elif args.cmd == "create":
             print_toon(summarize_pr(create_pr(args), "create", args.full))
         elif args.cmd == "get":
             result = get_pr(args)

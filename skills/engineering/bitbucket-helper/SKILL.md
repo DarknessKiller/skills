@@ -5,7 +5,7 @@ description: "Bitbucket PR operations: create, read, update, approve, diff."
 
 # Bitbucket Helper
 
-Auto-detects from git remote: `bitbucket.org` → Cloud, else → Server.
+Auto-detects Bitbucket Cloud or Server from configured git remote.
 
 The helper script lives at `scripts/bitbucket_server_pr.py` relative to this skill's directory (the harness resolves it). Run it from the user's repo with the script's absolute or skill-relative path:
 
@@ -27,6 +27,7 @@ Completion: operation scoped to detected repo and PR, mutations authorized.
 
 ```bash
 # Read
+list --repo-dir . [--state OPEN] [--limit 25] [--page-start 0]
 get <pr_id> --repo-dir . [--body]
 review-context <pr_id> --repo-dir .
 files <pr_id> --repo-dir .
