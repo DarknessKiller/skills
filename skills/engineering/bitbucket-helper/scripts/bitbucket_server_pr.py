@@ -93,7 +93,7 @@ def current_branch(repo_dir: str) -> str:
 
 
 def remote_url(repo_dir: str, remote: str) -> str:
-    return run_git(repo_dir, "remote", "get-url", remote)
+    return run_git(repo_dir, "config", "--get", f"remote.{remote}.url")
 
 
 def default_target_branch(repo_dir: str, remote: str) -> str:
