@@ -9,7 +9,7 @@
     {
       "name": "atlas-skills",
       "source": "./",
-      "description": "Atlas agent skills for implementation, TDD, code review, Git, Go, Bitbucket, and worktrees.",
+      "description": "Atlas agent skills for implementation, TDD, code review, Git, Go, Bitbucket.",
       "category": "engineering",
       "keywords": [
         "engineering",

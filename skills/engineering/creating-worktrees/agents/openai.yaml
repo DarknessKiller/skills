@@ -1,3 +1,0 @@
-interface:
-  display_name: "Creating Worktrees"
-  short_description: "Create repo-local Git worktrees"

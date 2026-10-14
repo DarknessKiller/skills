@@ -21,7 +21,6 @@ argument-hint: "What are you trying to do?"
 | Diff review | `/code-review` |
 | Creates or updates a PR title or description | `/pr-writing` |
 | Bitbucket PR | `/bitbucket-helper` |
-| Isolation before risky work | `/creating-worktrees` |
 | Explicitly requests parallel or multi-agent work | `/parallel-agents` |
 | Asks whether to split a service into separate modules or reshape boundaries | `/codebase-design` |
 | Vague goal or competing approaches | `/grilling` |
