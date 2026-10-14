@@ -16,7 +16,7 @@ argument-hint: "What should be implemented?"
 
 4. **Review.** Run formatter, lint, typecheck, tests. `/code-review` for non-trivial changes. Fix confirmed findings only.
 
-5. **Close out.** Summarize changed files and checks. Commit only when asked. `/git` rules. PR needed: `/bitbucket-helper`.
+5. **Close out.** Summarize changed files and checks. Commit only when asked. PR needed: `/bitbucket-helper`.
 
 ## Blocked
 

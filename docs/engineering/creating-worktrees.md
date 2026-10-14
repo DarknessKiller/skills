@@ -33,4 +33,4 @@ The leading phrase is **repo-local**. The skill prevents nested worktrees, times
 
 ## Where it fits
 
-Use this before [implement](https://github.com/darknesskiller/skills/tree/main/skills/engineering/implement) for risky work or parallel branches. Use [git](https://github.com/darknesskiller/skills/tree/main/skills/engineering/git) when you later commit from the worktree. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).
+Use this before [implement](https://github.com/darknesskiller/skills/tree/main/skills/engineering/implement) for risky work or parallel branches. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).

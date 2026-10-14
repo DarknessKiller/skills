@@ -59,4 +59,4 @@ Draft or refresh the description with [pr-writing](https://github.com/darknesski
 
 ## Where it fits
 
-Use this after [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing) when a branch is ready for a Bitbucket PR. Use [git](https://github.com/darknesskiller/skills/tree/main/skills/engineering/git) first if branch history needs cleanup. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).
+Use this after [pr-writing](https://github.com/darknesskiller/skills/tree/main/skills/engineering/pr-writing) when a branch is ready for a Bitbucket PR. The full map lives in [ask-atlas](https://github.com/darknesskiller/skills/tree/main/skills/engineering/ask-atlas).

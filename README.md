@@ -48,8 +48,6 @@ Daily code work.
 - **[code-review](./skills/engineering/code-review/SKILL.md)** — Review a diff on Standards and Spec as separate axes.
 - **[codebase-design](./skills/engineering/codebase-design/SKILL.md)** — Keep modules deep and boundaries clean.
 - **[creating-worktrees](./skills/engineering/creating-worktrees/SKILL.md)** — Create repo-local Git worktrees under `.worktrees/`.
-- **[git](./skills/engineering/git/SKILL.md)** — Keep commits small, conventional, and reviewable.
-- **[go](./skills/engineering/go/SKILL.md)** — Write explicit, context-safe Go.
 - **[pr-writing](./skills/engineering/pr-writing/SKILL.md)** — Draft pull request titles and descriptions from local git history.
 - **[tdd](./skills/engineering/tdd/SKILL.md)** — Drive changes with a red-green-refactor loop.
 

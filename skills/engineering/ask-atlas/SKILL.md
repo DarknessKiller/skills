@@ -24,8 +24,6 @@ argument-hint: "What are you trying to do?"
 | Isolation before risky work | `/creating-worktrees` |
 | Explicitly requests parallel or multi-agent work | `/parallel-agents` |
 | Asks whether to split a service into separate modules or reshape boundaries | `/codebase-design` |
-| Go code | `/go` |
-| Commit hygiene | `/git` |
 | Vague goal or competing approaches | `/grilling` |
 | Personal memory | `/personal-knowledge` |
 
